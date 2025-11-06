@@ -8,11 +8,13 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Add this
+import API_BASE_URL from '../../api';
+import { useToast } from '../../utils/ToastContext';
 
 const { width } = Dimensions.get('window');
 
@@ -21,6 +23,7 @@ const LoginScreen = () => {
   const [idNumber, setIdNumber] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
 
   const handleInputChange = (value) => {
     // Format ID number as user types
@@ -53,22 +56,60 @@ const LoginScreen = () => {
     return idRegex.test(idNumber);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!idNumber || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      toast.show('Please fill in all fields', 'error');
       return;
     }
 
     if (!validateIDNumber(idNumber)) {
-      Alert.alert('Error', 'Please enter a valid ID number in format: TUPT-XX-XXXX');
+      toast.show('Please enter a valid ID number in format: TUPT-XX-XXXX', 'error');
       return;
     }
     
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idNumber: idNumber,
+          password: password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store user data in AsyncStorage
+        const userData = {
+          _id: data.user._id,
+          name: data.user.name,
+          idNumber: data.user.idNumber,
+          birthdate: data.user.birthdate,
+          age: data.user.age,
+          createdAt: data.user.createdAt,
+          // Add any other user data you need
+        };
+        
+        // Store directly in AsyncStorage
+        await AsyncStorage.setItem('userData', JSON.stringify(userData));
+        
+        toast.show(data.message || 'Logged in successfully!', 'success');
+        console.log('User data stored:', userData);
+        navigation.navigate('Home');
+      } else {
+        toast.show(data.message || 'Login failed', 'error');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.show('Cannot connect to server. Please try again.', 'error');
+    } finally {
       setIsLoading(false);
-      Alert.alert('Success', 'Logged in successfully!');
-    }, 1500);
+    }
   };
 
   const handleClear = () => {
@@ -157,6 +198,7 @@ const LoginScreen = () => {
   );
 };
 
+// Keep all your existing styles the same
 const styles = StyleSheet.create({
   gradientBackground: {
     flex: 1,

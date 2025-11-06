@@ -8,12 +8,13 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import API_BASE_URL from '../../api';
+import { useToast } from '../../utils/ToastContext'; // Add this import
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +31,7 @@ const RegisterScreen = () => {
   const [passwordStrength, setPasswordStrength] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const toast = useToast(); // Add this
 
   const handleInputChange = (field, value) => {
     // Format ID number as user types
@@ -147,46 +149,72 @@ const RegisterScreen = () => {
     return age;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const { fullName, idNumber, birthdate, password, confirmPassword } = formData;
 
     if (!fullName || !idNumber || !birthdate || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      toast.show('Please fill in all fields', 'error');
       return;
     }
 
     if (!validateIDNumber(idNumber)) {
-      Alert.alert('Error', 'Please enter a valid ID number in format: TUPT-XX-XXXX');
+      toast.show('Please enter a valid ID number in format: TUPT-XX-XXXX', 'error');
       return;
     }
 
     const age = calculateAge(birthdate);
     if (age < 16) {
-      Alert.alert('Error', 'You must be at least 16 years old to register');
+      toast.show('You must be at least 16 years old to register', 'error');
       return;
     }
 
     if (age > 100) {
-      Alert.alert('Error', 'Please enter a valid birthdate');
+      toast.show('Please enter a valid birthdate', 'error');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      toast.show('Passwords do not match', 'error');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      toast.show('Password must be at least 6 characters long', 'error');
       return;
     }
 
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fullName,
+          idNumber: idNumber,
+          birthdate: birthdate,
+          password: password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.show(data.message || 'Account created successfully!', 'success');
+        setTimeout(() => {
+          navigation.navigate('Login');
+        }, 1500);
+      } else {
+        toast.show(data.message || 'Registration failed', 'error');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.show('Cannot connect to server. Please try again.', 'error');
+    } finally {
       setIsLoading(false);
-      Alert.alert('Success', 'Account created successfully!');
-      navigation.navigate('Login');
-    }, 1500);
+    }
   };
 
   const handleClear = () => {
