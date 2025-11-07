@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  Animated,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -23,10 +25,16 @@ const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState(null);
   const [filteredFeatures, setFilteredFeatures] = useState([]);
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   // Load user data
   useEffect(() => {
     loadUserData();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   // Filter features based on search query
@@ -57,45 +65,55 @@ const HomeScreen = () => {
     {
       icon: 'analytics',
       title: 'Thesis Analysis',
-      description: 'Advanced analysis tools for your research papers'
+      description: 'Advanced analysis tools for your research papers',
+      gradient: ['#6366f1', '#4f46e5'],
     },
     {
       icon: 'document-text',
       title: 'Document Management',
-      description: 'Organize and manage all your thesis documents'
+      description: 'Organize and manage all your thesis documents',
+      gradient: ['#ec4899', '#db2777'],
     },
     {
       icon: 'search',
       title: 'Smart Search',
-      description: 'Find relevant research papers quickly'
+      description: 'Find relevant research papers quickly',
+      gradient: ['#8b5cf6', '#7c3aed'],
     },
     {
       icon: 'stats-chart',
       title: 'Progress Tracking',
-      description: 'Monitor your research progress and milestones'
+      description: 'Monitor your research progress and milestones',
+      gradient: ['#14b8a6', '#0d9488'],
     },
     {
       icon: 'library',
       title: 'Thesis Library',
-      description: 'Access comprehensive thesis database'
+      description: 'Access comprehensive thesis database',
+      gradient: ['#f59e0b', '#d97706'],
     },
     {
       icon: 'trending-up',
       title: 'Research Trends',
-      description: 'Discover latest research trends and patterns'
+      description: 'Discover latest research trends and patterns',
+      gradient: ['#10b981', '#059669'],
     }
+  ];
+
+  const stats = [
+    { label: 'Active Projects', value: '12', icon: 'folder-open' },
+    { label: 'Completed', value: '48', icon: 'checkmark-circle' },
+    { label: 'In Progress', value: '8', icon: 'timer' },
   ];
 
   const handleSearch = () => {
     if (searchQuery) {
       console.log('Searching for:', searchQuery);
-      // Implement your search logic here
     }
   };
 
   const handleFeaturePress = (feature) => {
     console.log('Feature pressed:', feature.title);
-    // Add navigation logic for each feature
   };
 
   return (
@@ -108,96 +126,194 @@ const HomeScreen = () => {
       />
       
       <LinearGradient
-        colors={['#f9e8e9', '#c7242c']}
+        colors={['#fef2f2', '#fee2e2', '#fecaca']}
         style={styles.gradientBackground}
       >
         <ScrollView 
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
         >
-          {/* Welcome Section */}
-          <View style={styles.welcomeSection}>
-            <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.userName}>
-              {user?.name || 'Researcher'}
-            </Text>
-            <Text style={styles.welcomeSubtitle}>
-              {searchQuery ? `Search results for "${searchQuery}"` : 'Ready to continue your research?'}
-            </Text>
-          </View>
+          <Animated.View style={{ opacity: fadeAnim }}>
+            {/* Hero Section */}
+            <LinearGradient
+              colors={['#c7242c', '#991b1b']}
+              style={styles.heroSection}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <View style={styles.heroContent}>
+                <View style={styles.greetingContainer}>
+                  <Text style={styles.greetingText}>Hello,</Text>
+                  <Text style={styles.heroName}>{user?.name || 'Researcher'}</Text>
+                  <Text style={styles.heroSubtitle}>
+                    {searchQuery ? `Searching for "${searchQuery}"` : 'What would you like to explore today?'}
+                  </Text>
+                </View>
+                
+                {/* Stats Cards - Only show when not searching */}
+                {!searchQuery && (
+                  <View style={styles.statsContainer}>
+                    {stats.map((stat, index) => (
+                      <View key={index} style={styles.statCard}>
+                        <Ionicons name={stat.icon} size={20} color="#c7242c" />
+                        <Text style={styles.statValue}>{stat.value}</Text>
+                        <Text style={styles.statLabel}>{stat.label}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </LinearGradient>
 
-          {/* Search Results Count */}
-          {searchQuery && (
-            <View style={styles.searchResultsSection}>
-              <Text style={styles.searchResultsText}>
-                Found {filteredFeatures.length} result{filteredFeatures.length !== 1 ? 's' : ''}
-              </Text>
-            </View>
-          )}
-
-          {/* Features Grid */}
-          <View style={styles.featuresSection}>
-            <Text style={styles.sectionTitle}>
-              {searchQuery ? 'Search Results' : 'Quick Actions'}
-            </Text>
-            <View style={styles.featuresGrid}>
-              {filteredFeatures.map((feature, index) => (
-                <TouchableOpacity 
-                  key={index} 
-                  style={styles.featureCard}
-                  onPress={() => handleFeaturePress(feature)}
-                >
-                  <LinearGradient
-                    colors={['#605051', '#3a2c2d']}
-                    style={styles.featureGradient}
-                  >
-                    <Ionicons name={feature.icon} size={32} color="white" />
-                    <Text style={styles.featureTitle}>{feature.title}</Text>
-                    <Text style={styles.featureDescription}>{feature.description}</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* No Results Message */}
-            {searchQuery && filteredFeatures.length === 0 && (
-              <View style={styles.noResults}>
-                <Ionicons name="search" size={50} color="#605051" />
-                <Text style={styles.noResultsText}>No results found</Text>
-                <Text style={styles.noResultsSubtext}>
-                  Try different keywords or browse all features
+            {/* Search Results Count */}
+            {searchQuery && (
+              <View style={styles.searchResultsSection}>
+                <Ionicons name="filter" size={16} color="#991b1b" />
+                <Text style={styles.searchResultsText}>
+                  {filteredFeatures.length} result{filteredFeatures.length !== 1 ? 's' : ''} found
                 </Text>
               </View>
             )}
-          </View>
 
-          {/* Recent Activity - Only show when not searching */}
-          {!searchQuery && (
-            <View style={styles.activitySection}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
-              <View style={styles.activityList}>
-                <View style={styles.activityItem}>
-                  <Ionicons name="document-text" size={20} color="#c7242c" />
-                  <Text style={styles.activityText}>Thesis "AI in Education" updated</Text>
-                  <Text style={styles.activityTime}>2 hours ago</Text>
+            {/* Features Section */}
+            <View style={styles.featuresSection}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>
+                  {searchQuery ? 'Search Results' : 'Quick Actions'}
+                </Text>
+                {!searchQuery && (
+                  <TouchableOpacity>
+                    <Text style={styles.seeAllText}>See All</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              
+              <View style={styles.featuresGrid}>
+                {filteredFeatures.map((feature, index) => (
+                  <TouchableOpacity 
+                    key={index} 
+                    style={styles.featureCard}
+                    onPress={() => handleFeaturePress(feature)}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={feature.gradient}
+                      style={styles.featureGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <View style={styles.featureIconContainer}>
+                        <Ionicons name={feature.icon} size={28} color="white" />
+                      </View>
+                      <Text style={styles.featureTitle}>{feature.title}</Text>
+                      <Text style={styles.featureDescription}>{feature.description}</Text>
+                      <View style={styles.featureArrow}>
+                        <Ionicons name="arrow-forward" size={16} color="rgba(255,255,255,0.7)" />
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* No Results */}
+              {searchQuery && filteredFeatures.length === 0 && (
+                <View style={styles.noResults}>
+                  <View style={styles.noResultsIconContainer}>
+                    <Ionicons name="search-outline" size={60} color="#d1d5db" />
+                  </View>
+                  <Text style={styles.noResultsText}>No results found</Text>
+                  <Text style={styles.noResultsSubtext}>
+                    Try adjusting your search terms or browse all features
+                  </Text>
+                  <TouchableOpacity 
+                    style={styles.clearSearchButton}
+                    onPress={() => setSearchQuery('')}
+                  >
+                    <Text style={styles.clearSearchText}>Clear Search</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.activityItem}>
-                  <Ionicons name="analytics" size={20} color="#c7242c" />
-                  <Text style={styles.activityText}>Analysis completed for Research Paper</Text>
-                  <Text style={styles.activityTime}>1 day ago</Text>
+              )}
+            </View>
+
+            {/* Recent Activity - Only show when not searching */}
+            {!searchQuery && (
+              <View style={styles.activitySection}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Recent Activity</Text>
+                  <TouchableOpacity>
+                    <Text style={styles.seeAllText}>View All</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.activityItem}>
-                  <Ionicons name="library" size={20} color="#c7242c" />
-                  <Text style={styles.activityText}>3 new theses added to your library</Text>
-                  <Text style={styles.activityTime}>2 days ago</Text>
+                
+                <View style={styles.activityList}>
+                  <TouchableOpacity style={styles.activityItem} activeOpacity={0.7}>
+                    <View style={[styles.activityIcon, { backgroundColor: '#dbeafe' }]}>
+                      <Ionicons name="document-text" size={22} color="#2563eb" />
+                    </View>
+                    <View style={styles.activityContent}>
+                      <Text style={styles.activityTitle}>Thesis Updated</Text>
+                      <Text style={styles.activityDescription}>"AI in Education" document modified</Text>
+                    </View>
+                    <View style={styles.activityTimeContainer}>
+                      <Text style={styles.activityTime}>2h</Text>
+                      <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.activityItem} activeOpacity={0.7}>
+                    <View style={[styles.activityIcon, { backgroundColor: '#d1fae5' }]}>
+                      <Ionicons name="analytics" size={22} color="#059669" />
+                    </View>
+                    <View style={styles.activityContent}>
+                      <Text style={styles.activityTitle}>Analysis Complete</Text>
+                      <Text style={styles.activityDescription}>Research paper analysis finished</Text>
+                    </View>
+                    <View style={styles.activityTimeContainer}>
+                      <Text style={styles.activityTime}>1d</Text>
+                      <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.activityItem} activeOpacity={0.7}>
+                    <View style={[styles.activityIcon, { backgroundColor: '#fef3c7' }]}>
+                      <Ionicons name="library" size={22} color="#d97706" />
+                    </View>
+                    <View style={styles.activityContent}>
+                      <Text style={styles.activityTitle}>Library Updated</Text>
+                      <Text style={styles.activityDescription}>3 new theses added to collection</Text>
+                    </View>
+                    <View style={styles.activityTimeContainer}>
+                      <Text style={styles.activityTime}>2d</Text>
+                      <Ionicons name="chevron-forward" size={16} color="#9ca3af" />
+                    </View>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </View>
-          )}
+            )}
+
+            {/* Quick Tips Section - Only show when not searching */}
+            {!searchQuery && (
+              <View style={styles.tipsSection}>
+                <LinearGradient
+                  colors={['#f3f4f6', '#e5e7eb']}
+                  style={styles.tipCard}
+                >
+                  <Ionicons name="bulb" size={24} color="#f59e0b" />
+                  <View style={styles.tipContent}>
+                    <Text style={styles.tipTitle}>Pro Tip</Text>
+                    <Text style={styles.tipText}>
+                      Use Smart Search to find relevant papers based on keywords and citations
+                    </Text>
+                  </View>
+                </LinearGradient>
+              </View>
+            )}
+
+            <View style={{ height: 30 }} />
+          </Animated.View>
         </ScrollView>
       </LinearGradient>
 
-      {/* Hamburger Menu */}
       <HamburgerMenu
         isVisible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
@@ -210,6 +326,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   gradientBackground: {
     flex: 1,
@@ -217,127 +334,284 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  welcomeSection: {
-    padding: 25,
-    paddingTop: 30,
+  heroSection: {
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    paddingTop: 25,
+    paddingBottom: 30,
+    paddingHorizontal: 25,
+    marginBottom: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
-  welcomeText: {
-    fontSize: 18,
-    color: '#605051',
-    marginBottom: 5,
+  heroContent: {
+    gap: 20,
   },
-  userName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#c7242c',
+  greetingContainer: {
     marginBottom: 10,
   },
-  welcomeSubtitle: {
+  greetingText: {
     fontSize: 16,
-    color: '#605051',
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 4,
+  },
+  heroName: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 8,
+  },
+  heroSubtitle: {
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.9)',
+    lineHeight: 22,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: '#6b7280',
+    textAlign: 'center',
   },
   searchResultsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 25,
-    marginBottom: 10,
+    marginBottom: 15,
+    gap: 8,
   },
   searchResultsText: {
     fontSize: 14,
-    color: '#605051',
-    fontStyle: 'italic',
+    color: '#991b1b',
+    fontWeight: '600',
+  },
+  featuresSection: {
+    marginBottom: 25,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 25,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#605051',
-    marginBottom: 20,
-    marginLeft: 25,
+    color: '#1f2937',
   },
-  featuresSection: {
-    marginBottom: 30,
+  seeAllText: {
+    fontSize: 14,
+    color: '#c7242c',
+    fontWeight: '600',
   },
   featuresGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
     paddingHorizontal: 15,
     gap: 15,
   },
   featureCard: {
     width: (width - 45) / 2,
-    borderRadius: 15,
+    borderRadius: 20,
     overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    marginBottom: 15,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
   featureGradient: {
     padding: 20,
+    minHeight: 180,
+    justifyContent: 'space-between',
+  },
+  featureIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
-    minHeight: 140,
     justifyContent: 'center',
+    marginBottom: 12,
   },
   featureTitle: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
-    textAlign: 'center',
+    marginBottom: 6,
   },
   featureDescription: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 16,
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  featureArrow: {
+    alignSelf: 'flex-end',
   },
   noResults: {
     alignItems: 'center',
-    padding: 40,
+    paddingVertical: 50,
+    paddingHorizontal: 30,
+  },
+  noResultsIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
   noResultsText: {
-    fontSize: 18,
-    color: '#605051',
+    fontSize: 20,
+    color: '#374151',
     fontWeight: 'bold',
-    marginTop: 10,
+    marginBottom: 8,
   },
   noResultsSubtext: {
     fontSize: 14,
-    color: '#605051',
+    color: '#6b7280',
     textAlign: 'center',
-    marginTop: 5,
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  clearSearchButton: {
+    backgroundColor: '#c7242c',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  clearSearchText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
   },
   activitySection: {
-    marginBottom: 40,
+    marginBottom: 25,
   },
   activityList: {
     paddingHorizontal: 25,
+    gap: 12,
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    padding: 16,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
-  activityText: {
+  activityIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activityContent: {
     flex: 1,
-    marginLeft: 10,
-    color: '#605051',
-    fontSize: 14,
+    marginLeft: 14,
+  },
+  activityTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  activityDescription: {
+    fontSize: 13,
+    color: '#6b7280',
+    lineHeight: 18,
+  },
+  activityTimeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   activityTime: {
-    color: '#c7242c',
     fontSize: 12,
+    color: '#9ca3af',
     fontWeight: '500',
+  },
+  tipsSection: {
+    paddingHorizontal: 25,
+    marginBottom: 20,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'flex-start',
+    gap: 16,
+  },
+  tipContent: {
+    flex: 1,
+  },
+  tipTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 6,
+  },
+  tipText: {
+    fontSize: 14,
+    color: '#4b5563',
+    lineHeight: 20,
   },
 });
 

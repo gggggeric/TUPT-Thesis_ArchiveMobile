@@ -7,15 +7,18 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
   const slideAnim = React.useRef(new Animated.Value(-width)).current;
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const [user, setUser] = useState(null);
 
   // Load user data from AsyncStorage when menu becomes visible
@@ -38,27 +41,41 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
 
   React.useEffect(() => {
     if (isVisible) {
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
     } else {
-      Animated.timing(slideAnim, {
-        toValue: -width,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: -width,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
   }, [isVisible]);
 
   const menuItems = [
-    { icon: 'home', label: 'Home', screen: 'Home' },
-    { icon: 'document-text', label: 'My Theses', screen: 'Theses' },
-    { icon: 'analytics', label: 'Analysis', screen: 'Analysis' },
-    { icon: 'settings', label: 'Settings', screen: 'Settings' },
-    { icon: 'help-circle', label: 'Help & Support', screen: 'Help' },
-    { icon: 'information-circle', label: 'About', screen: 'About' },
+    { icon: 'home', label: 'Home', screen: 'Home', gradient: ['#6366f1', '#4f46e5'] },
+    { icon: 'document-text', label: 'My Theses', screen: 'Theses', gradient: ['#ec4899', '#db2777'] },
+    { icon: 'analytics', label: 'Analysis', screen: 'Analysis', gradient: ['#8b5cf6', '#7c3aed'] },
+    { icon: 'library', label: 'Library', screen: 'Library', gradient: ['#f59e0b', '#d97706'] },
+    { icon: 'settings', label: 'Settings', screen: 'Settings', gradient: ['#14b8a6', '#0d9488'] },
+    { icon: 'help-circle', label: 'Help & Support', screen: 'Help', gradient: ['#10b981', '#059669'] },
   ];
 
   const handleMenuItemPress = (screen) => {
@@ -86,11 +103,18 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
   return (
     <>
       {/* Overlay */}
-      <TouchableOpacity 
-        style={styles.overlay}
-        onPress={onClose}
-        activeOpacity={1}
-      />
+      <Animated.View 
+        style={[
+          styles.overlay,
+          { opacity: fadeAnim }
+        ]}
+      >
+        <TouchableOpacity 
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          activeOpacity={1}
+        />
+      </Animated.View>
       
       {/* Menu */}
       <Animated.View 
@@ -100,86 +124,129 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
         ]}
       >
         <LinearGradient
-          colors={['#605051', '#3a2c2d']}
+          colors={['#ffffff', '#fef2f2']}
           style={styles.menuGradient}
         >
-          {/* User Profile Section */}
-          <View style={styles.userSection}>
-            <View style={styles.userAvatar}>
-              <Ionicons name="person" size={40} color="white" />
-            </View>
-            <Text style={styles.userName}>
-              {user?.name || 'Guest User'}
-            </Text>
-            <Text style={styles.userId}>
-              {user?.idNumber || 'TUPT-00-0000'}
-            </Text>
-            {user?.age && (
-              <Text style={styles.userAge}>
-                Age: {user.age}
+          {/* Header Section with Red Gradient */}
+          <LinearGradient
+            colors={['#c7242c', '#991b1b']}
+            style={styles.headerSection}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            {/* User Profile Section */}
+            <View style={styles.userSection}>
+              <View style={styles.userAvatarContainer}>
+                <LinearGradient
+                  colors={['rgba(255, 255, 255, 0.3)', 'rgba(255, 255, 255, 0.1)']}
+                  style={styles.userAvatar}
+                >
+                  <Ionicons name="person" size={36} color="white" />
+                </LinearGradient>
+              </View>
+              <Text style={styles.userName}>
+                {user?.name || 'Guest User'}
               </Text>
+              <View style={styles.userInfoBadge}>
+                <Text style={styles.userId}>
+                  {user?.idNumber || 'TUPT-00-0000'}
+                </Text>
+              </View>
+              {user?.age && (
+                <Text style={styles.userAge}>
+                  Age: {user.age}
+                </Text>
+              )}
+            </View>
+          </LinearGradient>
+
+          {/* Scrollable Content */}
+          <ScrollView 
+            style={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContentContainer}
+          >
+            {/* Menu Items */}
+            <View style={styles.menuItems}>
+              {menuItems.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.menuItem}
+                  onPress={() => handleMenuItemPress(item.screen)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.menuItemContent}>
+                    <LinearGradient
+                      colors={item.gradient}
+                      style={styles.menuIconContainer}
+                    >
+                      <Ionicons 
+                        name={item.icon} 
+                        size={20} 
+                        color="white" 
+                      />
+                    </LinearGradient>
+                    <Text style={styles.menuItemText}>{item.label}</Text>
+                  </View>
+                  <Ionicons 
+                    name="chevron-forward" 
+                    size={18} 
+                    color="#9ca3af" 
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+
+          {/* Bottom Section */}
+          <View style={styles.bottomSection}>
+            {/* App Version */}
+            <View style={styles.versionContainer}>
+              <Ionicons name="information-circle-outline" size={16} color="#9ca3af" />
+              <Text style={styles.versionText}>Version 1.0.0</Text>
+            </View>
+
+            {/* Logout Button - Only show if user is logged in */}
+            {user && (
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={handleLogout}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#c7242c', '#991b1b']}
+                  style={styles.actionGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Ionicons name="log-out-outline" size={20} color="white" />
+                  <Text style={styles.actionText}>Logout</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+
+            {/* Login Button - Show if user is not logged in */}
+            {!user && (
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('Login');
+                }}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#c7242c', '#991b1b']}
+                  style={styles.actionGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Ionicons name="log-in-outline" size={20} color="white" />
+                  <Text style={styles.actionText}>Login</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             )}
           </View>
-
-          {/* Menu Items */}
-          <View style={styles.menuItems}>
-            {menuItems.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.menuItem}
-                onPress={() => handleMenuItemPress(item.screen)}
-              >
-                <View style={styles.menuItemContent}>
-                  <Ionicons 
-                    name={item.icon} 
-                    size={24} 
-                    color="rgba(255, 255, 255, 0.9)" 
-                  />
-                  <Text style={styles.menuItemText}>{item.label}</Text>
-                </View>
-                <Ionicons 
-                  name="chevron-forward" 
-                  size={20} 
-                  color="rgba(255, 255, 255, 0.6)" 
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Logout Button - Only show if user is logged in */}
-          {user && (
-            <TouchableOpacity 
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
-              <LinearGradient
-                colors={['#c7242c', '#a51c23']}
-                style={styles.logoutGradient}
-              >
-                <Ionicons name="log-out" size={20} color="white" />
-                <Text style={styles.logoutText}>Logout</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
-
-          {/* Login Button - Show if user is not logged in */}
-          {!user && (
-            <TouchableOpacity 
-              style={styles.loginButton}
-              onPress={() => {
-                onClose();
-                navigation.navigate('Login');
-              }}
-            >
-              <LinearGradient
-                colors={['#c7242c', '#a51c23']}
-                style={styles.loginGradient}
-              >
-                <Ionicons name="log-in" size={20} color="white" />
-                <Text style={styles.loginText}>Login</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
         </LinearGradient>
       </Animated.View>
     </>
@@ -193,122 +260,172 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     zIndex: 999,
   },
   menuContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: width * 0.8,
+    width: width * 0.85,
     height: '100%',
     zIndex: 1000,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 2, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 16,
+      },
+    }),
   },
   menuGradient: {
     flex: 1,
-    paddingTop: 60,
+  },
+  headerSection: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 50,
+    paddingBottom: 30,
+    borderBottomRightRadius: 30,
   },
   userSection: {
     alignItems: 'center',
-    paddingVertical: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  userAvatarContainer: {
+    marginBottom: 16,
   },
   userAvatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   userName: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 5,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  userInfoBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 6,
   },
   userId: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginBottom: 3,
+    fontSize: 13,
+    color: 'white',
+    fontWeight: '600',
   },
   userAge: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'rgba(255, 255, 255, 0.8)',
     fontStyle: 'italic',
   },
-  menuItems: {
+  scrollContent: {
     flex: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
+  },
+  menuItems: {
+    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   menuItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+  },
+  menuIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
   },
   menuItemText: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginLeft: 15,
+    color: '#1f2937',
+    fontWeight: '600',
+    flex: 1,
+  },
+  bottomSection: {
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    paddingTop: 10,
+  },
+  versionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    marginBottom: 12,
+    gap: 6,
+  },
+  versionText: {
+    fontSize: 12,
+    color: '#9ca3af',
     fontWeight: '500',
   },
-  logoutButton: {
-    margin: 20,
-    borderRadius: 10,
+  actionButton: {
+    borderRadius: 16,
     overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#c7242c',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
-  logoutGradient: {
+  actionGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    gap: 10,
   },
-  logoutText: {
+  actionText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  loginButton: {
-    margin: 20,
-    borderRadius: 10,
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  loginGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-  },
-  loginText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 10,
   },
 });
 
