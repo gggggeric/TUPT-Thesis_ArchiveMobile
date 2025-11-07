@@ -13,8 +13,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import API_BASE_URL from '../../api';
-import { useToast } from '../../utils/ToastContext'; // Add this import
+import { useToast } from '../../utils/ToastContext';
 
 const { width } = Dimensions.get('window');
 
@@ -31,30 +32,25 @@ const RegisterScreen = () => {
   const [passwordStrength, setPasswordStrength] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const toast = useToast(); // Add this
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const toast = useToast();
 
   const handleInputChange = (field, value) => {
-    // Format ID number as user types
     if (field === 'idNumber') {
-      // Remove all non-alphanumeric characters
       let formattedValue = value.replace(/[^a-zA-Z0-9]/g, '');
-      
-      // Convert to uppercase
       formattedValue = formattedValue.toUpperCase();
       
-      // Add TUPT- prefix if not present
       if (!formattedValue.startsWith('TUPT') && formattedValue.length > 0) {
         formattedValue = 'TUPT' + formattedValue;
       }
       
-      // Format as TUPT-XX-XXXX
       if (formattedValue.length > 4) {
         formattedValue = formattedValue.slice(0, 4) + '-' + formattedValue.slice(4);
       }
       if (formattedValue.length > 7) {
         formattedValue = formattedValue.slice(0, 7) + '-' + formattedValue.slice(7, 11);
       }
-      // Limit total length to 12 characters (TUPT-XX-XXXX)
       formattedValue = formattedValue.slice(0, 12);
       
       value = formattedValue;
@@ -74,7 +70,6 @@ const RegisterScreen = () => {
     setShowDatePicker(false);
     if (date) {
       setSelectedDate(date);
-      // Format date as YYYY-MM-DD
       const formattedDate = date.toISOString().split('T')[0];
       setFormData(prev => ({
         ...prev,
@@ -115,24 +110,23 @@ const RegisterScreen = () => {
 
   const getPasswordStrengthColor = () => {
     switch (passwordStrength) {
-      case 'weak': return '#ff5252';
-      case 'medium': return '#ffb142';
-      case 'strong': return '#2ed573';
+      case 'weak': return '#ef4444';
+      case 'medium': return '#f59e0b';
+      case 'strong': return '#10b981';
       default: return 'transparent';
     }
   };
 
   const getPasswordStrengthWidth = () => {
     switch (passwordStrength) {
-      case 'weak': return '25%';
-      case 'medium': return '50%';
+      case 'weak': return '33%';
+      case 'medium': return '66%';
       case 'strong': return '100%';
       default: return '0%';
     }
   };
 
   const validateIDNumber = (idNumber) => {
-    // Validate format: TUPT-XX-XXXX
     const idRegex = /^TUPT-\d{2}-\d{4}$/;
     return idRegex.test(idNumber);
   };
@@ -231,7 +225,7 @@ const RegisterScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#f9e8e9', '#c7242c']}
+      colors={['#fef2f2', '#fee2e2', '#fecaca']}
       style={styles.gradientBackground}
     >
       <KeyboardAvoidingView
@@ -243,39 +237,71 @@ const RegisterScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.loginSection}>
+            {/* Header Section */}
+            <View style={styles.headerSection}>
+              <LinearGradient
+                colors={['#c7242c', '#991b1b']}
+                style={styles.logoContainer}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="person-add" size={48} color="white" />
+              </LinearGradient>
+              <Text style={styles.welcomeTitle}>Create Account</Text>
+              <Text style={styles.welcomeSubtitle}>Join our research community</Text>
+            </View>
+
+            {/* Register Card */}
             <View style={styles.loginBox}>
-              <Text style={styles.loginTitle}>Create Account</Text>
-              <Text style={styles.loginSubtitle}>Join Thesis Analysis System</Text>
+              {/* Full Name Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Full Name</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="person-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your full name"
+                    placeholderTextColor="#9ca3af"
+                    value={formData.fullName}
+                    onChangeText={(value) => handleInputChange('fullName', value)}
+                    autoCapitalize="words"
+                  />
+                </View>
+              </View>
 
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your full name"
-                placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                value={formData.fullName}
-                onChangeText={(value) => handleInputChange('fullName', value)}
-                autoCapitalize="words"
-              />
+              {/* ID Number Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>ID Number</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="card-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="TUPT-XX-XXXX"
+                    placeholderTextColor="#9ca3af"
+                    value={formData.idNumber}
+                    onChangeText={(value) => handleInputChange('idNumber', value)}
+                    autoCapitalize="characters"
+                    keyboardType="default"
+                    maxLength={12}
+                  />
+                </View>
+                <Text style={styles.hintText}>Format: TUPT-XX-XXXX</Text>
+              </View>
 
-              <Text style={styles.label}>ID Number</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="TUPT-XX-XXXX"
-                placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                value={formData.idNumber}
-                onChangeText={(value) => handleInputChange('idNumber', value)}
-                autoCapitalize="characters"
-                keyboardType="default"
-                maxLength={12}
-              />
-              <Text style={styles.hintText}>Format: TUPT-XX-XXXX</Text>
-
-              <Text style={styles.label}>Birthdate</Text>
-              <TouchableOpacity style={styles.dateInput} onPress={showDatepicker}>
-                <Text style={formData.birthdate ? styles.dateText : styles.placeholderText}>
-                  {formData.birthdate ? formatDisplayDate(formData.birthdate) : 'Select your birthdate'}
-                </Text>
-              </TouchableOpacity>
+              {/* Birthdate Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Birthdate</Text>
+                <TouchableOpacity 
+                  style={styles.inputWrapper} 
+                  onPress={showDatepicker}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="calendar-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                  <Text style={formData.birthdate ? styles.dateText : styles.placeholderText}>
+                    {formData.birthdate ? formatDisplayDate(formData.birthdate) : 'Select your birthdate'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               {showDatePicker && (
                 <DateTimePicker
@@ -288,70 +314,120 @@ const RegisterScreen = () => {
                 />
               )}
 
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Create a password"
-                placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                value={formData.password}
-                onChangeText={(value) => handleInputChange('password', value)}
-                secureTextEntry
-                autoCapitalize="none"
-              />
-              
-              {passwordStrength ? (
-                <View style={styles.passwordStrengthContainer}>
-                  <View 
-                    style={[
-                      styles.passwordStrength,
-                      {
-                        backgroundColor: getPasswordStrengthColor(),
-                        width: getPasswordStrengthWidth(),
-                      }
-                    ]} 
+              {/* Password Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Password</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="lock-closed-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                  <TextInput
+                    style={[styles.input, styles.passwordInput]}
+                    placeholder="Create a password"
+                    placeholderTextColor="#9ca3af"
+                    value={formData.password}
+                    onChangeText={(value) => handleInputChange('password', value)}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
                   />
-                  <Text style={styles.strengthText}>
-                    Strength: {passwordStrength}
-                  </Text>
+                  <TouchableOpacity 
+                    style={styles.eyeIcon}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons 
+                      name={showPassword ? "eye-outline" : "eye-off-outline"} 
+                      size={20} 
+                      color="#6b7280" 
+                    />
+                  </TouchableOpacity>
                 </View>
-              ) : null}
+                
+                {passwordStrength ? (
+                  <View style={styles.passwordStrengthContainer}>
+                    <View style={styles.strengthBarContainer}>
+                      <View 
+                        style={[
+                          styles.passwordStrength,
+                          {
+                            backgroundColor: getPasswordStrengthColor(),
+                            width: getPasswordStrengthWidth(),
+                          }
+                        ]} 
+                      />
+                    </View>
+                    <Text style={[styles.strengthText, { color: getPasswordStrengthColor() }]}>
+                      {passwordStrength.charAt(0).toUpperCase() + passwordStrength.slice(1)}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
 
-              <Text style={styles.label}>Confirm Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm your password"
-                placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                value={formData.confirmPassword}
-                onChangeText={(value) => handleInputChange('confirmPassword', value)}
-                secureTextEntry
-                autoCapitalize="none"
-              />
+              {/* Confirm Password Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Confirm Password</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="lock-closed-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                  <TextInput
+                    style={[styles.input, styles.passwordInput]}
+                    placeholder="Confirm your password"
+                    placeholderTextColor="#9ca3af"
+                    value={formData.confirmPassword}
+                    onChangeText={(value) => handleInputChange('confirmPassword', value)}
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity 
+                    style={styles.eyeIcon}
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    <Ionicons 
+                      name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} 
+                      size={20} 
+                      color="#6b7280" 
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
+              {/* Buttons */}
               <View style={styles.buttons}>
                 <TouchableOpacity 
                   style={[styles.btnClear, isLoading && styles.disabledButton]}
                   onPress={handleClear}
                   disabled={isLoading}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.buttonText}>Clear</Text>
+                  <Ionicons name="close-circle-outline" size={18} color="#c7242c" />
+                  <Text style={styles.clearButtonText}>Clear</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity 
-                  style={[styles.btnLogin, isLoading && styles.disabledButton]}
+                  style={[styles.btnRegister, isLoading && styles.disabledButton]}
                   onPress={handleRegister}
                   disabled={isLoading}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.buttonText}>
-                    {isLoading ? 'Creating...' : 'Register'}
-                  </Text>
+                  <LinearGradient
+                    colors={['#c7242c', '#991b1b']}
+                    style={styles.registerGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    {isLoading ? (
+                      <Text style={styles.registerButtonText}>Creating...</Text>
+                    ) : (
+                      <>
+                        <Text style={styles.registerButtonText}>Register</Text>
+                        <Ionicons name="arrow-forward" size={18} color="white" />
+                      </>
+                    )}
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.moreInfoContainer}>
+              {/* Sign In Link */}
+              <View style={styles.signInContainer}>
+                <Text style={styles.signInText}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                  <Text style={styles.moreInfoLink}>
-                    Already have an account? Sign in
-                  </Text>
+                  <Text style={styles.signInLink}>Sign in</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -379,142 +455,201 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  logoContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#c7242c',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  welcomeTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: '#6b7280',
+  },
   loginBox: {
     width: width > 480 ? 420 : '100%',
     maxWidth: 420,
-    padding: 25,
-    borderRadius: 4,
-    backgroundColor: '#605051',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 8,
-      height: 8,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 25,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 30,
+    borderRadius: 24,
+    backgroundColor: 'white',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
-  loginTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  inputContainer: {
     marginBottom: 20,
-    textAlign: 'center',
-    color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-    borderBottomWidth: 2,
-    borderBottomColor: '#c62828',
-    paddingBottom: 10,
-  },
-  loginSubtitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#b5b5b5',
-    paddingBottom: 5,
-    color: 'white',
   },
   label: {
     fontSize: 14,
-    marginVertical: 10,
-    color: 'white',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    paddingHorizontal: 16,
+    minHeight: 50,
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    width: '100%',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 2,
-    marginBottom: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: 'white',
+    flex: 1,
+    paddingVertical: 14,
     fontSize: 16,
+    color: '#1f2937',
   },
-  dateInput: {
-    width: '100%',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 2,
-    marginBottom: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
+  passwordInput: {
+    paddingRight: 40,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    padding: 4,
   },
   dateText: {
-    color: 'white',
+    flex: 1,
     fontSize: 16,
+    color: '#1f2937',
+    paddingVertical: 14,
   },
   placeholderText: {
-    color: 'rgba(255, 255, 255, 0.6)',
+    flex: 1,
     fontSize: 16,
+    color: '#9ca3af',
+    paddingVertical: 14,
   },
   hintText: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
-    marginBottom: 10,
+    color: '#9ca3af',
+    marginTop: 6,
     fontStyle: 'italic',
   },
   passwordStrengthContainer: {
-    marginBottom: 10,
+    marginTop: 8,
+  },
+  strengthBarContainer: {
+    height: 4,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 6,
   },
   passwordStrength: {
-    height: 5,
+    height: '100%',
     borderRadius: 2,
-    marginBottom: 5,
+    transition: 'width 0.3s ease',
   },
   strengthText: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
-    textAlign: 'center',
+    fontWeight: '600',
+    textAlign: 'right',
   },
   buttons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 15,
+    gap: 12,
+    marginTop: 10,
+    marginBottom: 20,
   },
   btnClear: {
-    backgroundColor: '#c62828',
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#f9fafb',
     borderWidth: 1,
-    borderColor: '#b71c1c',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 2,
-    minWidth: 80,
+    borderColor: '#e5e7eb',
+    gap: 6,
   },
-  btnLogin: {
-    backgroundColor: '#c62828',
-    borderWidth: 1,
-    borderColor: '#b71c1c',
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 2,
-    minWidth: 100,
+  clearButtonText: {
+    color: '#c7242c',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  btnRegister: {
+    flex: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#c7242c',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  registerGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    gap: 8,
+  },
+  registerButtonText: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 'bold',
   },
   disabledButton: {
     opacity: 0.6,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  moreInfoContainer: {
-    marginTop: 20,
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+  signInContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
   },
-  moreInfoLink: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
-    textDecorationLine: 'underline',
+  signInText: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
+  signInLink: {
+    fontSize: 14,
+    color: '#c7242c',
+    fontWeight: '600',
   },
 });
 

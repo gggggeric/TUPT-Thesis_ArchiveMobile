@@ -8,7 +8,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -186,7 +185,7 @@ const ProfileScreen = () => {
 
   if (!user) {
     return (
-      <LinearGradient colors={['#f9e8e9', '#c7242c']} style={styles.gradientBackground}>
+      <LinearGradient colors={['#fef2f2', '#fee2e2', '#fecaca']} style={styles.gradientBackground}>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
@@ -195,7 +194,10 @@ const ProfileScreen = () => {
   }
 
   return (
-    <LinearGradient colors={['#f9e8e9', '#c7242c']} style={styles.gradientBackground}>
+    <LinearGradient
+      colors={['#fef2f2', '#fee2e2', '#fecaca']}
+      style={styles.gradientBackground}
+    >
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -205,79 +207,108 @@ const ProfileScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.profileSection}>
-            <View style={styles.profileBox}>
-              {/* Header */}
-              <View style={styles.header}>
-                <TouchableOpacity 
-                  style={styles.backButton}
-                  onPress={() => navigation.goBack()}
+            {/* Header Section */}
+            <View style={styles.headerSection}>
+              <TouchableOpacity 
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back" size={24} color="#1f2937" />
+              </TouchableOpacity>
+              
+              <View style={styles.avatarContainer}>
+                <LinearGradient
+                  colors={['#c7242c', '#991b1b']}
+                  style={styles.avatar}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
                 >
-                  <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
-                <Text style={styles.title}>Profile Settings</Text>
+                  <Ionicons name="person" size={48} color="white" />
+                </LinearGradient>
+              </View>
+              
+              <Text style={styles.welcomeTitle}>{user.name}</Text>
+              <Text style={styles.welcomeSubtitle}>{user.idNumber}</Text>
+            </View>
+
+            {/* Profile Card */}
+            <View style={styles.profileBox}>
+              {/* Edit/Cancel Button Header */}
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>Profile Information</Text>
                 {!isEditing ? (
                   <TouchableOpacity 
                     style={styles.editButton}
                     onPress={() => setIsEditing(true)}
                   >
-                    <Ionicons name="create" size={24} color="white" />
+                    <Ionicons name="create-outline" size={20} color="#c7242c" />
+                    <Text style={styles.editButtonText}>Edit</Text>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity 
                     style={styles.cancelButton}
                     onPress={handleCancelEdit}
                   >
+                    <Ionicons name="close-circle-outline" size={20} color="#6b7280" />
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                 )}
               </View>
 
-              {/* User Avatar */}
-              <View style={styles.avatarContainer}>
-                <View style={styles.avatar}>
-                  <Ionicons name="person" size={50} color="white" />
-                </View>
-                <Text style={styles.userId}>{user.idNumber}</Text>
-              </View>
-
               {/* Profile Form */}
               <View style={styles.formContainer}>
                 {/* Name Field */}
-                <Text style={styles.label}>Full Name</Text>
-                <TextInput
-                  style={[styles.input, !isEditing && styles.disabledInput]}
-                  value={formData.name}
-                  onChangeText={(value) => handleInputChange('name', value)}
-                  editable={isEditing}
-                  placeholder="Enter your full name"
-                  placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                />
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Full Name</Text>
+                  <View style={[styles.inputWrapper, !isEditing && styles.disabledInputWrapper]}>
+                    <Ionicons name="person-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      value={formData.name}
+                      onChangeText={(value) => handleInputChange('name', value)}
+                      editable={isEditing}
+                      placeholder="Enter your full name"
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+                </View>
 
                 {/* ID Number (Read-only) */}
-                <Text style={styles.label}>ID Number</Text>
-                <TextInput
-                  style={[styles.input, styles.disabledInput]}
-                  value={user.idNumber}
-                  editable={false}
-                  placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                />
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>ID Number</Text>
+                  <View style={[styles.inputWrapper, styles.disabledInputWrapper]}>
+                    <Ionicons name="card-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      value={user.idNumber}
+                      editable={false}
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+                </View>
 
                 {/* Birthdate Field */}
-                <Text style={styles.label}>Birthdate</Text>
-                {isEditing ? (
-                  <TouchableOpacity 
-                    style={styles.dateInput}
-                    onPress={() => setShowDatePicker(true)}
-                  >
-                    <Text style={formData.birthdate ? styles.dateText : styles.placeholderText}>
-                      {formData.birthdate ? formatDisplayDate(formData.birthdate) : 'Select birthdate'}
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <Text style={styles.readOnlyText}>
-                    {formatDisplayDate(user.birthdate)}
-                  </Text>
-                )}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Birthdate</Text>
+                  {isEditing ? (
+                    <TouchableOpacity 
+                      style={styles.inputWrapper}
+                      onPress={() => setShowDatePicker(true)}
+                    >
+                      <Ionicons name="calendar-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                      <Text style={formData.birthdate ? styles.dateText : styles.placeholderText}>
+                        {formData.birthdate ? formatDisplayDate(formData.birthdate) : 'Select birthdate'}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={[styles.inputWrapper, styles.disabledInputWrapper]}>
+                      <Ionicons name="calendar-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                      <Text style={styles.dateText}>
+                        {formatDisplayDate(user.birthdate)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
 
                 {showDatePicker && (
                   <DateTimePicker
@@ -291,47 +322,64 @@ const ProfileScreen = () => {
                 )}
 
                 {/* Age (Read-only) */}
-                <Text style={styles.label}>Age</Text>
-                <Text style={styles.readOnlyText}>{user.age} years old</Text>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Age</Text>
+                  <View style={[styles.inputWrapper, styles.disabledInputWrapper]}>
+                    <Ionicons name="time-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                    <Text style={styles.dateText}>{user.age} years old</Text>
+                  </View>
+                </View>
 
                 {/* Password Change Section */}
                 {isEditing && (
                   <View style={styles.passwordSection}>
                     <Text style={styles.sectionTitle}>Change Password</Text>
+                    <Text style={styles.sectionSubtitle}>Leave blank if you don't want to change</Text>
                     
-                    <Text style={styles.label}>Current Password</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={formData.currentPassword}
-                      onChangeText={(value) => handleInputChange('currentPassword', value)}
-                      secureTextEntry
-                      placeholder="Enter current password"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                    />
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.label}>Current Password</Text>
+                      <View style={styles.inputWrapper}>
+                        <Ionicons name="lock-closed-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={formData.currentPassword}
+                          onChangeText={(value) => handleInputChange('currentPassword', value)}
+                          secureTextEntry
+                          placeholder="Enter current password"
+                          placeholderTextColor="#9ca3af"
+                        />
+                      </View>
+                    </View>
 
-                    <Text style={styles.label}>New Password</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={formData.newPassword}
-                      onChangeText={(value) => handleInputChange('newPassword', value)}
-                      secureTextEntry
-                      placeholder="Enter new password"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                    />
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.label}>New Password</Text>
+                      <View style={styles.inputWrapper}>
+                        <Ionicons name="lock-closed-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={formData.newPassword}
+                          onChangeText={(value) => handleInputChange('newPassword', value)}
+                          secureTextEntry
+                          placeholder="Enter new password"
+                          placeholderTextColor="#9ca3af"
+                        />
+                      </View>
+                    </View>
 
-                    <Text style={styles.label}>Confirm New Password</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={formData.confirmPassword}
-                      onChangeText={(value) => handleInputChange('confirmPassword', value)}
-                      secureTextEntry
-                      placeholder="Confirm new password"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                    />
-
-                    <Text style={styles.passwordHint}>
-                      Leave password fields empty if you don't want to change password
-                    </Text>
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.label}>Confirm New Password</Text>
+                      <View style={styles.inputWrapper}>
+                        <Ionicons name="lock-closed-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                        <TextInput
+                          style={styles.input}
+                          value={formData.confirmPassword}
+                          onChangeText={(value) => handleInputChange('confirmPassword', value)}
+                          secureTextEntry
+                          placeholder="Confirm new password"
+                          placeholderTextColor="#9ca3af"
+                        />
+                      </View>
+                    </View>
                   </View>
                 )}
 
@@ -341,10 +389,23 @@ const ProfileScreen = () => {
                     style={[styles.updateButton, isLoading && styles.disabledButton]}
                     onPress={handleUpdateProfile}
                     disabled={isLoading}
+                    activeOpacity={0.8}
                   >
-                    <Text style={styles.updateButtonText}>
-                      {isLoading ? 'Updating...' : 'Update Profile'}
-                    </Text>
+                    <LinearGradient
+                      colors={['#c7242c', '#991b1b']}
+                      style={styles.updateGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                    >
+                      {isLoading ? (
+                        <Text style={styles.updateButtonText}>Updating...</Text>
+                      ) : (
+                        <>
+                          <Text style={styles.updateButtonText}>Update Profile</Text>
+                          <Ionicons name="checkmark-circle" size={20} color="white" />
+                        </>
+                      )}
+                    </LinearGradient>
                   </TouchableOpacity>
                 )}
               </View>
@@ -365,6 +426,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingHorizontal: 20,
     paddingVertical: 40,
   },
   loadingContainer: {
@@ -373,155 +435,201 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    color: '#605051',
+    color: '#6b7280',
     fontSize: 18,
   },
   profileSection: {
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 20,
   },
-  profileBox: {
-    width: width > 480 ? 420 : '100%',
-    maxWidth: 420,
-    padding: 25,
-    borderRadius: 4,
-    backgroundColor: '#605051',
-    shadowColor: '#000',
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 0.9,
-    shadowRadius: 25,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  header: {
-    flexDirection: 'row',
+  headerSection: {
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginBottom: 30,
+    width: '100%',
   },
   backButton: {
-    padding: 5,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  editButton: {
-    padding: 5,
-  },
-  cancelButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontSize: 16,
+    alignSelf: 'flex-start',
+    padding: 8,
+    marginBottom: 20,
   },
   avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 16,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#c7242c',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
-  userId: {
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  welcomeSubtitle: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontWeight: '500',
+    color: '#6b7280',
+  },
+  profileBox: {
+    width: width > 480 ? 420 : '100%',
+    maxWidth: 420,
+    padding: 30,
+    borderRadius: 24,
+    backgroundColor: 'white',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  editButtonText: {
+    fontSize: 14,
+    color: '#c7242c',
+    fontWeight: '600',
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: '600',
   },
   formContainer: {
     width: '100%',
   },
+  inputContainer: {
+    marginBottom: 20,
+  },
   label: {
     fontSize: 14,
-    marginVertical: 8,
-    color: 'white',
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
   },
-  input: {
-    width: '100%',
-    padding: 12,
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 2,
-    marginBottom: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: 'white',
-    fontSize: 16,
+    borderColor: '#e5e7eb',
+    paddingHorizontal: 16,
+    minHeight: 50,
   },
-  disabledInput: {
+  disabledInputWrapper: {
+    backgroundColor: '#f3f4f6',
     opacity: 0.7,
   },
-  dateInput: {
-    width: '100%',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 2,
-    marginBottom: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#1f2937',
   },
   dateText: {
-    color: 'white',
+    flex: 1,
     fontSize: 16,
+    color: '#1f2937',
+    paddingVertical: 14,
   },
   placeholderText: {
-    color: 'rgba(255, 255, 255, 0.6)',
+    flex: 1,
     fontSize: 16,
-  },
-  readOnlyText: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 16,
-    marginBottom: 15,
-    paddingVertical: 12,
+    color: '#9ca3af',
+    paddingVertical: 14,
   },
   passwordSection: {
-    marginTop: 20,
-    paddingTop: 20,
+    marginTop: 24,
+    paddingTop: 24,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderTopColor: '#e5e7eb',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 15,
-    textAlign: 'center',
+    color: '#1f2937',
+    marginBottom: 4,
   },
-  passwordHint: {
+  sectionSubtitle: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: '#9ca3af',
+    marginBottom: 16,
     fontStyle: 'italic',
-    textAlign: 'center',
-    marginTop: 10,
   },
   updateButton: {
-    backgroundColor: '#c7242c',
-    paddingVertical: 15,
-    borderRadius: 2,
-    alignItems: 'center',
-    marginTop: 20,
+    marginTop: 24,
+    borderRadius: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#c7242c',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
-  disabledButton: {
-    opacity: 0.6,
+  updateGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    gap: 8,
   },
   updateButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 
