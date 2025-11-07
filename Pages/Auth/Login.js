@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -133,16 +134,15 @@ const LoginScreen = () => {
           <View style={styles.loginSection}>
             {/* Logo/Header Section */}
             <View style={styles.headerSection}>
-              <LinearGradient
-                colors={['#c7242c', '#991b1b']}
-                style={styles.logoContainer}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="school" size={48} color="white" />
-              </LinearGradient>
-              <Text style={styles.welcomeTitle}>Welcome Back</Text>
-              <Text style={styles.welcomeSubtitle}>Sign in to continue your research</Text>
+              <View style={styles.logoContainer}>
+                <Image 
+                  source={require('../../assets/tup-logo.png')} 
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.welcomeTitle}>TUPT-Thesis Archive</Text>
+              <Text style={styles.welcomeSubtitle}>Sign in</Text>
             </View>
 
             {/* Login Card */}
@@ -271,12 +271,15 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
+    borderWidth: 3,
+    borderColor: '#c7242c',
     ...Platform.select({
       ios: {
         shadowColor: '#c7242c',
@@ -288,6 +291,10 @@ const styles = StyleSheet.create({
         elevation: 8,
       },
     }),
+  },
+  logoImage: {
+    width: 70,
+    height: 70,
   },
   welcomeTitle: {
     fontSize: 32,
