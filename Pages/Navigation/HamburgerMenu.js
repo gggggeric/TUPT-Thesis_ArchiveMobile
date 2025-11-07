@@ -135,7 +135,14 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
             end={{ x: 1, y: 1 }}
           >
             {/* User Profile Section */}
-            <View style={styles.userSection}>
+            <TouchableOpacity 
+              style={styles.userSection}
+              onPress={() => {
+                onClose();
+                navigation.navigate('Profile');
+              }}
+              activeOpacity={0.8}
+            >
               <View style={styles.userAvatarContainer}>
                 <LinearGradient
                   colors={['rgba(255, 255, 255, 0.3)', 'rgba(255, 255, 255, 0.1)']}
@@ -143,6 +150,9 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
                 >
                   <Ionicons name="person" size={36} color="white" />
                 </LinearGradient>
+                <View style={styles.editIconContainer}>
+                  <Ionicons name="create-outline" size={16} color="white" />
+                </View>
               </View>
               <Text style={styles.userName}>
                 {user?.name || 'Guest User'}
@@ -157,7 +167,10 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
                   Age: {user.age}
                 </Text>
               )}
-            </View>
+              <View style={styles.viewProfileHint}>
+                <Text style={styles.viewProfileText}>Tap to view profile</Text>
+              </View>
+            </TouchableOpacity>
           </LinearGradient>
 
           {/* Scrollable Content */}
@@ -296,6 +309,7 @@ const styles = StyleSheet.create({
   },
   userAvatarContainer: {
     marginBottom: 16,
+    position: 'relative',
   },
   userAvatar: {
     width: 80,
@@ -305,6 +319,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  editIconContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#c7242c',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'white',
   },
   userName: {
     fontSize: 22,
@@ -328,6 +355,15 @@ const styles = StyleSheet.create({
   userAge: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
+    fontStyle: 'italic',
+    marginBottom: 8,
+  },
+  viewProfileHint: {
+    marginTop: 4,
+  },
+  viewProfileText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.7)',
     fontStyle: 'italic',
   },
   scrollContent: {
