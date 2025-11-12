@@ -1,4 +1,3 @@
-// Navigation/HamburgerMenu.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -71,7 +70,7 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
 
   const menuItems = [
     { icon: 'home', label: 'Home', screen: 'Home', gradient: ['#6366f1', '#4f46e5'] },
-    { icon: 'document-text', label: 'My Theses', screen: 'Theses', gradient: ['#ec4899', '#db2777'] },
+    { icon: 'document-text', label: 'My Documents', screen: 'ThesisAnalysis', gradient: ['#ec4899', '#db2777'] },
     { icon: 'analytics', label: 'Analysis', screen: 'Analysis', gradient: ['#8b5cf6', '#7c3aed'] },
     { icon: 'library', label: 'Library', screen: 'Library', gradient: ['#f59e0b', '#d97706'] },
     { icon: 'settings', label: 'Settings', screen: 'Settings', gradient: ['#14b8a6', '#0d9488'] },
@@ -80,8 +79,10 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
 
   const handleMenuItemPress = (screen) => {
     onClose();
-    // You can add navigation logic here
-    console.log(`Navigate to: ${screen}`);
+    // Navigate to the specified screen
+    if (navigation && screen) {
+      navigation.navigate(screen);
+    }
   };
 
   const handleLogout = async () => {
@@ -266,6 +267,7 @@ const HamburgerMenu = ({ isVisible, onClose, navigation }) => {
   );
 };
 
+// ... keep your existing styles the same ...
 const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',

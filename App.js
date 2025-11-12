@@ -6,6 +6,7 @@ import LoginScreen from './Pages/Auth/Login';
 import RegisterScreen from './Pages/Auth/Register';
 import HomeScreen from './Pages/Home';
 import ProfileScreen from './Pages/User/Profile';
+import ThesisAnalysisScreen from './Pages/Thesis/ThesisAnalysis';
 import { ToastProvider } from './utils/ToastContext';
 
 const Stack = createStackNavigator();
@@ -22,6 +23,7 @@ export default function App() {
         >
            <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Landing" component={LandingScreen} />
+          <Stack.Screen name="ThesisAnalysis" component={ThesisAnalysisScreen} />
            <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
