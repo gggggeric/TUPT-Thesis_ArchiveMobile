@@ -4,7 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import CustomHeader from '../Navigation/CustomHeader';
-import HamburgerMenu from '../Navigation/HamburgerMenu';
+import GridMenu from '../Navigation/GridMenu';
+import BottomNavBar from '../Navigation/BottomNavBar';
 import Colors from '../../utils/Colors';
 
 const { width } = Dimensions.get('window');
@@ -29,7 +30,8 @@ const DocumentsHub = () => {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
             />
-            <HamburgerMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+            {/* Grid Menu */}
+            <GridMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
 
             <ScrollView 
                 style={styles.scrollView}
@@ -128,6 +130,9 @@ const DocumentsHub = () => {
                 </View>
 
             </ScrollView>
+
+            {/* Bottom Nav Bar */}
+            <BottomNavBar activeScreen="DocumentsHub" onGridPress={() => setIsMenuVisible(true)} />
         </LinearGradient>
     );
 };
@@ -141,7 +146,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingTop: 40,
-        paddingBottom: 60,
+        paddingBottom: 110,
     },
     heroSection: {
         paddingHorizontal: 24,

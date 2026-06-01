@@ -90,7 +90,7 @@ const RegisterScreen = () => {
       age--;
     }
     if (age < 18) {
-      toast.show('Institutional access requires you to be at least 18 years old', 'error');
+      toast.show('You must be at least 18 years old to register', 'error');
       return;
     }
     if (password !== confirmPassword) {
@@ -148,10 +148,10 @@ const RegisterScreen = () => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerEyebrow}>INSTITUTIONAL PORTAL</Text>
+            <Text style={styles.headerEyebrow}>TUP RESEARCH LIBRARY</Text>
             <Text style={styles.headerTitle}>CREATE ACCOUNT</Text>
             <View style={styles.headerAccentLine} />
-            <Text style={styles.headerSub}>Join the TUP research archive community</Text>
+            <Text style={styles.headerSub}>Join the TUP research community</Text>
           </View>
 
           {/* Card */}
@@ -205,6 +205,7 @@ const RegisterScreen = () => {
                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                   onChange={handleDateChange}
                   maximumDate={new Date()}
+                  textColor="#ffffff"
                 />
               )}
             </View>

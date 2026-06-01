@@ -246,22 +246,22 @@ const ThesisDetailScreen = () => {
                     <Text style={styles.letterheadTitle}>Technological University of the Philippines</Text>
                     <Text style={styles.letterheadSubtitle}>Taguig City Campus</Text>
                     <View style={styles.letterheadDivider} />
-                    <Text style={styles.letterheadFooter}>Office of the University Registrar • Digital Research Repository</Text>
+                    <Text style={styles.letterheadFooter}>Office of the University Registrar • TUP Research Library</Text>
                     
                     {/* Archive Stamp */}
                     <View style={styles.archiveStamp}>
-                        <Text style={styles.archiveStampText}>ARCHIVED</Text>
+                        <Text style={styles.archiveStampText}>APPROVED COPY</Text>
                     </View>
                 </View>
 
                 {/* Metadata Row */}
                 <View style={styles.metadataRow}>
                     <View style={styles.metaCol}>
-                        <Text style={styles.metaLabel}>Accession Number</Text>
+                        <Text style={styles.metaLabel}>Reference ID</Text>
                         <Text style={styles.metaValue}>{thesis.id}</Text>
                     </View>
                     <View style={[styles.metaCol, {alignItems: 'flex-end'}]}>
-                        <Text style={styles.metaLabel}>Certification Date</Text>
+                        <Text style={styles.metaLabel}>Certified Date</Text>
                         <Text style={styles.metaValue}>
                             {new Date(thesis.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                         </Text>
@@ -273,7 +273,7 @@ const ThesisDetailScreen = () => {
                     <Text style={styles.thesisTitleMain}>{thesis.title}</Text>
                     <View style={styles.extractBadgeContainer}>
                         <View style={styles.extractDivider} />
-                        <Text style={styles.extractText}>Formal Thesis Extract</Text>
+                        <Text style={styles.extractText}>Abstract Overview</Text>
                         <View style={styles.extractDivider} />
                     </View>
                     <View style={styles.categoryBadge}>
@@ -284,7 +284,7 @@ const ThesisDetailScreen = () => {
                 {/* Author Section */}
                 <View style={styles.authorSection}>
                     <View style={styles.sectionDividerRow}>
-                        <Text style={styles.sectionDividerText}>INVESTIGATIVE COUNCIL</Text>
+                        <Text style={styles.sectionDividerText}>RESEARCHERS / AUTHORS</Text>
                         <View style={styles.sectionDividerLine} />
                     </View>
                     <Text style={styles.authorText}>{extractAuthors(thesis)}</Text>
@@ -294,7 +294,7 @@ const ThesisDetailScreen = () => {
                 {/* Abstract Section */}
                 <View style={styles.abstractSection}>
                     <View style={styles.sectionDividerRow}>
-                        <Text style={styles.sectionDividerText}>EXECUTIVE ABSTRACT</Text>
+                        <Text style={styles.sectionDividerText}>SUMMARY</Text>
                         <View style={styles.sectionDividerLine} />
                     </View>
                     
@@ -315,7 +315,7 @@ const ThesisDetailScreen = () => {
                 {/* Footer Security Mark */}
                 <View style={styles.securityMark}>
                     <View style={styles.securityDot} />
-                    <Text style={styles.securityText}>INSTITUTIONAL SECURITY</Text>
+                    <Text style={styles.securityText}>SYSTEM CERTIFIED</Text>
                 </View>
 
             </View>
@@ -432,6 +432,122 @@ const styles = StyleSheet.create({
       marginBottom: 30
   },
   metaCol: { flex: 1 },
+  metaLabel: {
+    fontSize: 8,
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 4,
+    fontWeight: '800',
+  },
+  metaValue: {
+    fontSize: 11,
+    color: '#111827',
+    fontWeight: '800',
+  },
+  titleSection: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  thesisTitleMain: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#111827',
+    textAlign: 'center',
+    lineHeight: 22,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  extractBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 4,
+  },
+  extractDivider: {
+    width: 24,
+    height: 1,
+    backgroundColor: 'rgba(17, 24, 39, 0.15)',
+    marginHorizontal: 8,
+  },
+  extractText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  categoryBadge: {
+    borderWidth: 1,
+    borderColor: 'rgba(17, 24, 39, 0.15)',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginTop: 8,
+  },
+  categoryText: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#374151',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  authorSection: {
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  sectionDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+  },
+  sectionDividerText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: '#6b7280',
+    letterSpacing: 1.5,
+    marginRight: 8,
+  },
+  sectionDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(17, 24, 39, 0.1)',
+  },
+  authorText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#111827',
+    textAlign: 'center',
+    lineHeight: 16,
+    marginBottom: 4,
+  },
+  facultyText: {
+    fontSize: 8,
+    fontWeight: '700',
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  abstractSection: {
+    width: '100%',
+    marginBottom: 40,
+  },
+  paragraphContainer: {
+    marginBottom: 10,
+  },
+  abstractText: {
+    fontSize: 11,
+    color: '#374151',
+    lineHeight: 18,
+    textAlign: 'justify',
+  },
+  dropCap: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#111827',
+  },
   securityMark: { position: 'absolute', bottom: 20, left: 0, right: 0, alignItems: 'center', opacity: 0.3 },
   securityDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#111827', marginBottom: 4 },
   securityText: { fontSize: 6, fontWeight: '900', color: '#111827', letterSpacing: 2 },
@@ -481,10 +597,10 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
           <View style={modalStyles.modalHeader}>
             <View>
               <Text style={modalStyles.modalTitle}>
-                {isSimilarity ? 'Similarity Check' : 'AI Recommendation'}
+                {isSimilarity ? 'Match Check' : 'AI Suggestion'}
               </Text>
               <Text style={{ fontSize: 10, color: Colors.primary, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
-                {isSimilarity ? 'Searching library databases' : 'Generating creative insights'}
+                {isSimilarity ? 'Searching library...' : 'Generating suggestions...'}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={modalStyles.closeBtn}>
@@ -519,7 +635,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                       <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border, marginBottom: 25 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 10 }}>
                           <Ionicons name="alert-circle" size={20} color={Colors.primary} />
-                          <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Top Conflict Detected</Text>
+                          <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Similar Title Found</Text>
                         </View>
                         <Text style={{ fontSize: 14, color: Colors.textSecondary, fontWeight: 'bold', fontStyle: 'italic', lineHeight: 20 }}>"{data.match.title}"</Text>
                       </View>
@@ -527,7 +643,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                     <View style={{ marginBottom: 30 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, gap: 10 }}>
                         <Ionicons name="bulb-outline" size={20} color={Colors.primary} />
-                        <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Strategic Recommendation</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>AI Suggestion</Text>
                       </View>
                       <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border }}>
                         <Text style={{ fontSize: 14, color: Colors.textSecondary, lineHeight: 24 }}>{data.recommendation}</Text>
@@ -538,7 +654,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                   <View style={{ marginBottom: 30 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, gap: 10 }}>
                       <Ionicons name="sparkles" size={20} color={Colors.primary} />
-                      <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Optimized Recommendations</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>AI Suggestions</Text>
                     </View>
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border }}>
                       <Text style={{ fontSize: 14, color: Colors.textSecondary, lineHeight: 24 }}>{data}</Text>

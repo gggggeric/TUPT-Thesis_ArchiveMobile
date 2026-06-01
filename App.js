@@ -11,14 +11,14 @@ import ProfileScreen from './Pages/User/Profile';
 import ThesisAnalysisScreen from './Pages/Thesis/ThesisAnalysis';
 import SmartSearchScreen from './Pages/Thesis/SmartSearch';
 import ThesisDetailScreen from './Pages/Thesis/ThesisDetail';
-import DocumentsHubScreen from './Pages/Documents/DocumentsHub';
 import AnalysisWorkspaceScreen from './Pages/Documents/Analysis/AnalysisWorkspace';
-import SubmitThesisScreen from './Pages/Documents/Submit/SubmitThesis';
-import MySubmissionsScreen from './Pages/Documents/Submissions/MySubmissions';
 import SearchResultScreen from './Pages/Search/SearchResult';
 import CollaborationScreen from './Pages/Collaboration/Collaboration';
 import ApprovalsScreen from './Pages/User/Approvals';
 import { ToastProvider } from './utils/ToastContext';
+import API_BASE_URL from './api';
+
+console.log('[App] Configured API_BASE_URL:', API_BASE_URL);
 
 const Stack = createStackNavigator();
 
@@ -42,10 +42,7 @@ export default function App() {
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Forgot" component={ForgotScreen} />
           
-          <Stack.Screen name="DocumentsHub" component={DocumentsHubScreen} />
           <Stack.Screen name="AnalysisWorkspace" component={AnalysisWorkspaceScreen} />
-          <Stack.Screen name="SubmitThesis" component={SubmitThesisScreen} />
-          <Stack.Screen name="MySubmissions" component={MySubmissionsScreen} />
           <Stack.Screen name="SearchResult" component={SearchResultScreen} />
           <Stack.Screen name="Collaboration" component={CollaborationScreen} />
           <Stack.Screen name="Approvals" component={ApprovalsScreen} />

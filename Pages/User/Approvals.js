@@ -5,15 +5,16 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../Navigation/CustomHeader';
-import HamburgerMenu from '../Navigation/HamburgerMenu';
+import GridMenu from '../Navigation/GridMenu';
 import API_BASE_URL from '../../api';
 import Colors from '../../utils/Colors';
 
 const Approvals = () => {
     const navigation = useNavigation();
+    const isFocused = useIsFocused();
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -127,7 +128,10 @@ const Approvals = () => {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
             />
-            <HamburgerMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+            {/* Grid Menu */}
+            {isFocused && (
+                <GridMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+            )}
 
             <ScrollView
                 style={styles.scroll}

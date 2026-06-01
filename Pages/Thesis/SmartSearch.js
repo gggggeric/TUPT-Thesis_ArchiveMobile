@@ -125,7 +125,7 @@ const SmartSearchScreen = () => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={Colors.foreground} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Smart Search</Text>
+        <Text style={styles.headerTitle}>AI Search</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -165,8 +165,8 @@ const SmartSearchScreen = () => {
                     <Ionicons name="hardware-chip" size={22} color={Colors.primary} />
                   </View>
                   <View style={styles.aiHeaderTextContainer}>
-                     <Text style={styles.aiTitle}>AI Title Recommendation</Text>
-                     <Text style={styles.aiSubtitle}>Get a professional thesis title tailored to your search</Text>
+                     <Text style={styles.aiTitle}>AI Suggestions</Text>
+                     <Text style={styles.aiSubtitle}>Get title ideas based on your search</Text>
                   </View>
                 </View>
                 
@@ -186,7 +186,7 @@ const SmartSearchScreen = () => {
                             <Ionicons name="sparkles" size={18} color="#fff" style={{ marginRight: 8 }} />
                         )}
                         <Text style={styles.aiButtonText}>
-                            {isLoadingAi ? 'Generating Idea...' : 'Recommend by AI'}
+                            {isLoadingAi ? 'Creating suggestions...' : 'Get AI Suggestions'}
                         </Text>
                     </TouchableOpacity>
                 )}

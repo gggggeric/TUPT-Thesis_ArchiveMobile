@@ -131,11 +131,11 @@ const LoginScreen = () => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerEyebrow}>INSTITUTIONAL PORTAL</Text>
+            <Text style={styles.headerEyebrow}>TUP RESEARCH LIBRARY</Text>
             <Text style={styles.headerTitle}>SIGN IN</Text>
             <View style={styles.headerAccentLine} />
             <Text style={styles.headerSub}>
-              Access your TUP research archive account
+              Sign in to your TUP research account
             </Text>
           </View>
 
@@ -194,6 +194,7 @@ const LoginScreen = () => {
                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                   onChange={handleDateChange}
                   maximumDate={new Date()}
+                  textColor="#ffffff"
                 />
               )}
             </View>
