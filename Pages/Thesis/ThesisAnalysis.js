@@ -14,11 +14,11 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import CustomHeader from '../Navigation/CustomHeader';
-import HamburgerMenu from '../Navigation/HamburgerMenu';
+import GridMenu from '../Navigation/GridMenu';
 
 const { width, height } = Dimensions.get('window');
 const isSmallDevice = width < 375;
@@ -28,6 +28,7 @@ const API_BASE_URL = 'http://10.81.7.28:5001';
 
 const MyDocuments = () => {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [analysisResults, setAnalysisResults] = useState(null);
@@ -345,14 +346,14 @@ const MyDocuments = () => {
             >
               <View style={styles.heroContent}>
                 <View style={styles.greetingContainer}>
-                  <Text style={styles.greetingText}>Thesis Analysis</Text>
-                  <Text style={styles.heroName}>Document Review</Text>
+                  <Text style={styles.greetingText}>Thesis Checker</Text>
+                  <Text style={styles.heroName}>Document Checker</Text>
                   <Text style={styles.heroSubtitle}>
                     {analysisResults 
                       ? 'Analysis complete! View your results' 
                       : isAnalyzing 
                       ? 'Analyzing your document...' 
-                      : 'Upload thesis for comprehensive analysis'
+                      : 'Upload thesis to get AI feedback'
                     }
                   </Text>
                 </View>
@@ -374,7 +375,7 @@ const MyDocuments = () => {
             <View style={styles.featuresSection}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>
-                  {analysisResults ? 'Analysis Complete' : 'Upload Thesis'}
+                  {analysisResults ? 'Check Complete' : 'Upload Thesis'}
                 </Text>
               </View>
               
@@ -405,13 +406,13 @@ const MyDocuments = () => {
                       )}
                     </View>
                     <Text style={styles.featureTitle}>
-                      {isAnalyzing ? 'Analyzing...' : 
+                      {isAnalyzing ? 'Checking...' : 
                        analysisResults ? 'Complete' : 
                        'Upload Thesis'}
                     </Text>
                     <Text style={styles.featureDescription}>
-                      {isAnalyzing ? 'Processing document' :
-                       analysisResults ? 'View analysis results' :
+                      {isAnalyzing ? 'Checking document' :
+                       analysisResults ? 'View suggestions' :
                        'PDF, DOC, DOCX, TXT files'}
                     </Text>
                   </LinearGradient>
@@ -435,7 +436,7 @@ const MyDocuments = () => {
                       </View>
                       <Text style={styles.featureTitle}>View Results</Text>
                       <Text style={styles.featureDescription}>
-                        Detailed analysis and recommendations
+                        Detailed suggestions and feedback
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -454,7 +455,7 @@ const MyDocuments = () => {
                         {uploadedFile.name}
                       </Text>
                       <Text style={styles.activityDescription}>
-                        {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB • {isAnalyzing ? 'Analyzing...' : 'Ready'}
+                        {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB • {isAnalyzing ? 'Checking...' : 'Ready'}
                       </Text>
                     </View>
                     <View style={styles.activityTimeContainer}>
@@ -489,7 +490,7 @@ const MyDocuments = () => {
                               ]} 
                             />
                           </View>
-                          <Text style={styles.progressText}>Processing... {uploadProgress}%</Text>
+                          <Text style={styles.progressText}>Checking... {uploadProgress}%</Text>
                         </View>
                       </View>
                     </View>
@@ -529,7 +530,7 @@ const MyDocuments = () => {
           {/* Header */}
           <View style={styles.modalHeader}>
             <View style={styles.modalTitleSection}>
-              <Text style={styles.modalTitle}>Analysis Results</Text>
+              <Text style={styles.modalTitle}>Feedback Results</Text>
               <Text style={styles.modalSubtitle} numberOfLines={1}>
                 {uploadedFile?.name}
               </Text>
@@ -554,7 +555,7 @@ const MyDocuments = () => {
                   </View>
                   <View style={styles.scoreInfo}>
                     <Text style={styles.scoreInfoTitle}>Overall Score</Text>
-                    <Text style={styles.scoreInfoSubtitle}>Document quality assessment</Text>
+                    <Text style={styles.scoreInfoSubtitle}>Review feedback score</Text>
                   </View>
                 </View>
 
@@ -581,7 +582,7 @@ const MyDocuments = () => {
                 {/* Recommendations */}
                 <View style={styles.recommendations}>
                   <View style={styles.recommendationsHeader}>
-                    <Text style={styles.recommendationsTitle}>Recommendations</Text>
+                    <Text style={styles.recommendationsTitle}>Suggestions</Text>
                     <Text style={styles.recommendationsCount}>
                       {analysisResults.recommendations?.length || 0} areas
                     </Text>
@@ -648,21 +649,23 @@ const MyDocuments = () => {
           <View style={styles.modalActions}>
             <TouchableOpacity style={styles.secondaryBtn} onPress={downloadReport}>
               <Ionicons name="download" size={20} color="#c7242c" />
-              <Text style={styles.secondaryBtnText}>Export</Text>
+              <Text style={styles.secondaryBtnText}>Save Report</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.primaryBtn} onPress={resetAnalysis}>
               <Ionicons name="refresh" size={20} color="white" />
-              <Text style={styles.primaryBtnText}>New Analysis</Text>
+              <Text style={styles.primaryBtnText}>New Check</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
       </Modal>
 
-      <HamburgerMenu
-        isVisible={isMenuVisible}
-        onClose={() => setIsMenuVisible(false)}
-        navigation={navigation}
-      />
+      {isFocused && (
+        <GridMenu
+          isVisible={isMenuVisible}
+          onClose={() => setIsMenuVisible(false)}
+          navigation={navigation}
+        />
+      )}
     </SafeAreaView>
   );
 };

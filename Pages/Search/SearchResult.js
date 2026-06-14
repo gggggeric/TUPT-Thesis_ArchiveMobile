@@ -28,11 +28,8 @@ const FilterModal = ({
   visible, onClose, onApply, onClear,
   selectedYear, onYearChange,
   selectedCourse, onCourseChange,
-  selectedType, onTypeChange,
   availableYears, availableCourses
 }) => {
-  const types = ['all', 'Thesis', 'CAPSTONE', 'Dissertation'];
-
   return (
     <Modal
       animationType="slide"
@@ -45,7 +42,7 @@ const FilterModal = ({
           <View style={modalStyles.modalHeader}>
             <Text style={modalStyles.modalTitle}>Refine Search</Text>
             <TouchableOpacity onPress={onClose} style={modalStyles.closeBtn}>
-              <Ionicons name="close" size={24} color="#1f2937" />
+              <Ionicons name="close" size={24} color="#ffffff" />
             </TouchableOpacity>
           </View>
 
@@ -61,10 +58,11 @@ const FilterModal = ({
                 selectedValue={selectedYear}
                 onValueChange={(val) => onYearChange(val)}
                 style={modalStyles.picker}
-                itemStyle={{ color: '#1f2937' }}
+                itemStyle={{ color: '#ffffff' }}
+                dropdownIconColor="#ffffff"
               >
                 {availableYears.map(y => (
-                    <Picker.Item key={y} label={y === 'all' ? 'All Years' : y} value={y} />
+                    <Picker.Item key={y} label={y === 'all' ? 'All Years' : y} value={y} color={Platform.OS === 'ios' ? '#ffffff' : '#ffffff'} />
                 ))}
               </Picker>
             </View>
@@ -76,25 +74,11 @@ const FilterModal = ({
                 selectedValue={selectedCourse}
                 onValueChange={(val) => onCourseChange(val)}
                 style={modalStyles.picker}
-                itemStyle={{ color: '#1f2937' }}
+                itemStyle={{ color: '#ffffff' }}
+                dropdownIconColor="#ffffff"
               >
                 {availableCourses.map(c => (
-                    <Picker.Item key={c} label={c === 'all' ? 'All Courses' : c} value={c} />
-                ))}
-              </Picker>
-            </View>
-
-            {/* Type Filter */}
-            <Text style={modalStyles.filterLabel}>Research Type</Text>
-            <View style={modalStyles.pickerContainer}>
-              <Picker
-                selectedValue={selectedType}
-                onValueChange={(val) => onTypeChange(val)}
-                style={modalStyles.picker}
-                itemStyle={{ color: '#1f2937' }}
-              >
-                {types.map(t => (
-                    <Picker.Item key={t} label={t === 'all' ? 'All Types' : t} value={t} />
+                    <Picker.Item key={c} label={c === 'all' ? 'All Courses' : c} value={c} color={Platform.OS === 'ios' ? '#ffffff' : '#ffffff'} />
                 ))}
               </Picker>
             </View>
@@ -129,10 +113,10 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
           <View style={modalStyles.modalHeader}>
             <View>
               <Text style={modalStyles.modalTitle}>
-                {isSimilarity ? 'Similarity Check' : 'AI Recommendation'}
+                {isSimilarity ? 'Match Check' : 'AI Suggestion'}
               </Text>
               <Text style={{ fontSize: 10, color: Colors.primary, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
-                {isSimilarity ? 'Searching library databases' : 'Generating creative insights'}
+                {isSimilarity ? 'Searching library...' : 'Generating suggestions...'}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={modalStyles.closeBtn}>
@@ -167,7 +151,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                       <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border, marginBottom: 25 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 10 }}>
                           <Ionicons name="alert-circle" size={20} color={Colors.primary} />
-                          <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Top Conflict Detected</Text>
+                          <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Similar Title Found</Text>
                         </View>
                         <Text style={{ fontSize: 14, color: Colors.textSecondary, fontWeight: 'bold', fontStyle: 'italic', lineHeight: 20 }}>"{data.match.title}"</Text>
                       </View>
@@ -175,7 +159,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                     <View style={{ marginBottom: 30 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, gap: 10 }}>
                         <Ionicons name="bulb-outline" size={20} color={Colors.primary} />
-                        <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Strategic Recommendation</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>AI Suggestion</Text>
                       </View>
                       <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border }}>
                         <Text style={{ fontSize: 14, color: Colors.textSecondary, lineHeight: 24 }}>{data.recommendation}</Text>
@@ -186,7 +170,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                   <View style={{ marginBottom: 30 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, gap: 10 }}>
                       <Ionicons name="sparkles" size={20} color={Colors.primary} />
-                      <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>Optimized Recommendations</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>AI Suggestions</Text>
                     </View>
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border }}>
                       <Text style={{ fontSize: 14, color: Colors.textSecondary, lineHeight: 24 }}>{data}</Text>
@@ -435,8 +419,6 @@ const SearchResultScreen = () => {
         onYearChange={setSelectedYear}
         selectedCourse={selectedCourse}
         onCourseChange={setSelectedCourse}
-        selectedType={selectedType}
-        onTypeChange={setSelectedType}
         onApply={applyFilters}
         onClear={clearFilters}
         availableYears={availableYears}
@@ -487,11 +469,6 @@ const SearchResultScreen = () => {
                     {selectedCourse !== 'all' && (
                         <View style={styles.filterBadge}>
                             <Text style={styles.filterBadgeText}>Dept: {selectedCourse}</Text>
-                        </View>
-                    )}
-                    {selectedType !== 'all' && (
-                        <View style={styles.filterBadge}>
-                            <Text style={styles.filterBadgeText}>Type: {selectedType}</Text>
                         </View>
                     )}
                 </View>

@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,17 +20,23 @@ import * as ImagePicker from 'expo-image-picker';
 import API_BASE_URL from '../../api';
 import { useToast } from '../../utils/ToastContext';
 import Colors from '../../utils/Colors';
+import BottomNavBar from '../Navigation/BottomNavBar';
+import GridMenu from '../Navigation/GridMenu';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const toast = useToast();
+  const insets = useSafeAreaInsets();
   
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -62,6 +68,18 @@ const ProfileScreen = () => {
     } catch (error) {
       console.error('Error loading user data:', error);
       toast.show('Error loading profile data', 'error');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userData');
+      await AsyncStorage.removeItem('userToken');
+      setUser(null);
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast.show('Error logging out', 'error');
     }
   };
 
@@ -266,29 +284,30 @@ const ProfileScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView 
-          contentContainerStyle={styles.scrollContainer}
+          contentContainerStyle={[styles.scrollContainer, { paddingTop: Math.max(insets.top + 16, 40) }]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.profileSection}>
             {/* Header Section */}
             <View style={styles.headerSection}>
-              <TouchableOpacity 
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-              >
-                <Ionicons name="arrow-back" size={24} color="#1f2937" />
-              </TouchableOpacity>
-              
               <View style={styles.avatarContainer}>
-                <TouchableOpacity onPress={pickImage} style={[styles.avatar, { backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.primary }]}>
+                <TouchableOpacity 
+                  onPress={pickImage} 
+                  style={[styles.avatar, { backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.primary }]}
+                  activeOpacity={0.85}
+                >
                   {user.profilePhoto ? (
-                    <Image source={{ uri: user.profilePhoto }} style={{ width: '100%', height: '100%', borderRadius: 50 }} />
+                    <Image source={{ uri: user.profilePhoto }} style={{ width: '100%', height: '100%' }} />
                   ) : (
                     <Ionicons name="person" size={48} color={Colors.primary} />
                   )}
-                  <View style={styles.cameraIconContainer}>
-                    <Ionicons name="camera" size={16} color="#fff" />
-                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={pickImage} 
+                  style={styles.cameraIconContainer}
+                  activeOpacity={0.85}
+                >
+                  <Ionicons name="camera" size={16} color="#fff" />
                 </TouchableOpacity>
               </View>
               
@@ -383,6 +402,7 @@ const ProfileScreen = () => {
                     onChange={handleDateChange}
                     maximumDate={new Date()}
                     minimumDate={new Date(1900, 0, 1)}
+                    textColor="#ffffff"
                   />
                 )}
 
@@ -470,9 +490,29 @@ const ProfileScreen = () => {
                 )}
               </View>
             </View>
+
+            {/* Logout Button (only visible when not editing) */}
+            {!isEditing && (
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="log-out-outline" size={20} color={Colors.accent} style={{ marginRight: 6 }} />
+                <Text style={styles.logoutText}>Logout</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Grid Menu */}
+      {isFocused && (
+        <GridMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+      )}
+
+      {/* Bottom Nav Bar */}
+      <BottomNavBar activeScreen="Profile" onGridPress={() => setIsMenuVisible(true)} />
     </View>
   );
 };
@@ -488,7 +528,8 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingTop: 40,
+    paddingBottom: 110,
   },
   loadingContainer: {
     flex: 1,
@@ -693,6 +734,31 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+  logoutButton: {
+    width: width > 480 ? 420 : '100%',
+    maxWidth: 420,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: 'rgba(243, 139, 168, 0.05)',
+    borderColor: 'rgba(243, 139, 168, 0.2)',
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom: 10,
+    ...Platform.select({
+      ios: { shadowColor: Colors.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 6 },
+      android: { elevation: 2 },
+    }),
+  },
+  logoutText: {
+    color: Colors.accent,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
 });
 

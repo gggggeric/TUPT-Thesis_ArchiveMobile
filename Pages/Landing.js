@@ -17,6 +17,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../utils/Colors';
 
 const { width, height } = Dimensions.get('window');
@@ -25,8 +26,8 @@ const features = [
   {
     number: '01',
     badge: 'Smart Search',
-    title: 'Find Any Thesis in Seconds',
-    desc: 'Advanced semantic search indexes thousands of institutional papers. Search by title, author, or keywords — results ranked by relevance in milliseconds.',
+    title: 'Find Any Paper in Seconds',
+    desc: 'Advanced smart search indexes thousands of university papers. Search by title, author, or keywords — results ranked by relevance in milliseconds.',
     icon: 'search',
     color: Colors.blue,
   },
@@ -49,8 +50,8 @@ const features = [
   {
     number: '04',
     badge: 'Document Analysis',
-    title: 'Upload & Extract Metadata',
-    desc: 'Upload your thesis PDF and our system automatically extracts title, authors, and metadata. No manual entry needed.',
+    title: 'Upload & Extract Details',
+    desc: 'Upload your thesis PDF and our system automatically extracts title, authors, and details. No manual entry needed.',
     icon: 'cloud-upload',
     color: Colors.green,
   },
@@ -65,6 +66,22 @@ const LandingScreen = () => {
   const subtitleAnim = React.useRef(new Animated.Value(0)).current;
   const primaryBtnAnim = React.useRef(new Animated.Value(0)).current;
   const secondaryActionsAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    checkExistingSession();
+  }, []);
+
+  const checkExistingSession = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const userData = await AsyncStorage.getItem('userData');
+      if (token && userData) {
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+      }
+    } catch (err) {
+      console.log('Error checking existing session:', err);
+    }
+  };
 
   React.useEffect(() => {
     if (isFocused) {
@@ -111,8 +128,8 @@ const LandingScreen = () => {
                     <Image source={require('../assets/tup-logo.png')} style={styles.headerLogo} resizeMode="contain" />
                   </View>
                   <View>
-                    <Text style={styles.headerBrand}>TUPT ARCHIVE</Text>
-                    <Text style={styles.headerBrandSub}>ACTIVE PORTAL</Text>
+                    <Text style={styles.headerBrand}>TUPT LIBRARY</Text>
+                    <Text style={styles.headerBrandSub}>ACTIVE SYSTEM</Text>
                   </View>
                 </View>
 
@@ -133,15 +150,32 @@ const LandingScreen = () => {
                     styles.heroTitle,
                     { opacity: titleAnim, transform: [{ translateY: translateY(titleAnim) }] }
                   ]}>
-                    THE DIGITAL ARCHIVE OF TUP EXCELLENCE
+                    TUP DIGITAL RESEARCH LIBRARY
                   </Animated.Text>
 
                   <Animated.Text style={[
                     styles.heroSubtitle,
                     { opacity: subtitleAnim, transform: [{ translateY: translateY(subtitleAnim) }] }
                   ]}>
-                    A centralized repository for future-ready engineers. Store, search, and verify your research with institutional precision.
+                    A central library for TUP students. Store, search, and check your research with university standards.
                   </Animated.Text>
+
+                  <Animated.View style={{ 
+                    opacity: primaryBtnAnim, 
+                    transform: [{ translateY: translateY(primaryBtnAnim) }],
+                    width: '100%',
+                    alignItems: 'center',
+                    marginTop: 10
+                  }}>
+                    <TouchableOpacity
+                      style={styles.btnHeroPrimary}
+                      onPress={() => navigation.navigate('Register')}
+                      activeOpacity={0.9}
+                    >
+                      <Text style={styles.btnHeroPrimaryText}>GET STARTED</Text>
+                      <Ionicons name="arrow-forward" size={16} color={Colors.background} />
+                    </TouchableOpacity>
+                  </Animated.View>
                 </View>
               </View>
 
@@ -186,17 +220,17 @@ const LandingScreen = () => {
       {/* ════ WHY CHOOSE SECTION ════ */}
       <View style={styles.whyChooseSection}>
         <Text style={styles.sectionSubtitle}>INNOVATION FIRST</Text>
-        <Text style={styles.sectionTitle}>Archive of{'\n'}<Text style={styles.sectionTitleAccent}>Knowledge</Text></Text>
+        <Text style={styles.sectionTitle}>Library of{'\n'}<Text style={styles.sectionTitleAccent}>Knowledge</Text></Text>
         <Text style={styles.sectionDesc}>
-          We've built more than just a storage system. A high-performance environment designed to protect institutional knowledge while making it accessible for the next generation.
+          We've built more than just a storage system. A high-performance environment designed to protect student research while making it accessible for the next generation.
         </Text>
 
         <View style={styles.benefitsGrid}>
           {[
-            { title: 'Institutional Trust', desc: 'Secure repository endorsed by TUP-Taguig leadership.', icon: 'shield-checkmark' },
+            { title: 'Trusted Source', desc: 'Secure library endorsed by TUP-Taguig leadership.', icon: 'shield-checkmark' },
             { title: 'Modern Tools', desc: 'Next-gen search and analysis interface.', icon: 'rocket' },
-            { title: 'Clean Design', desc: 'A minimalist, flawless student-focused experience.', icon: 'bulb' },
-            { title: 'Verified Quality', desc: 'AI-assisted verification for academic standards.', icon: 'checkmark-circle' },
+            { title: 'Simple Design', desc: 'A simple, clean student experience.', icon: 'bulb' },
+            { title: 'Verified Quality', desc: 'AI checking for academic standards.', icon: 'checkmark-circle' },
           ].map((item, i) => (
             <View key={i} style={styles.benefitCard}>
               <Ionicons name={item.icon} size={28} color={Colors.primary} style={styles.benefitIcon} />
@@ -212,14 +246,14 @@ const LandingScreen = () => {
         colors={[Colors.card, Colors.background]}
         style={styles.coreFunctionsSection}
       >
-        <Text style={styles.sectionSubtitleSecondary}>CORE FUNCTIONS</Text>
+        <Text style={styles.sectionSubtitleSecondary}>WHAT THE APP DOES</Text>
         <Text style={styles.sectionTitleWhite}>WHAT DOES IT DO?</Text>
 
         <View style={styles.coreFunctionsList}>
           {[
-            { icon: 'search', title: 'RAPID SEARCH', desc: 'Search thousands of institutional papers in milliseconds with our advanced indexing engine.' },
-            { icon: 'checkmark-circle', title: 'AI VALIDATION', desc: 'Ensure your research title meets quality standards before official submission.' },
-            { icon: 'document-text', title: 'FULL ARCHIVE', desc: 'Digitally store your approved thesis with metadata to inspire future Technologists.' },
+            { icon: 'search', title: 'QUICK SEARCH', desc: 'Search thousands of student papers in milliseconds with our advanced search system.' },
+            { icon: 'checkmark-circle', title: 'AI HELP', desc: 'Ensure your research title meets quality standards before submitting.' },
+            { icon: 'document-text', title: 'RESEARCH COLLECTION', desc: 'Digitally store your approved thesis with details to inspire future students.' },
           ].map((item, i) => (
             <View key={i} style={styles.coreFuncItem}>
               <View style={styles.coreFuncIconBox}>
@@ -234,15 +268,15 @@ const LandingScreen = () => {
 
       {/* ════ HOW IT WORKS SECTION ════ */}
       <View style={styles.howItWorksSection}>
-        <Text style={styles.sectionSubtitle}>SYSTEM WORKFLOW</Text>
+        <Text style={styles.sectionSubtitle}>HOW IT WORKS</Text>
         <Text style={[styles.sectionTitle, { color: Colors.foreground }]}>HOW DOES IT WORK?</Text>
 
         <View style={styles.workflowGrid}>
           {[
             { step: '01', title: 'REGISTER', desc: 'Securely create your student account using your TUP ID.' },
             { step: '02', title: 'EXPLORE', desc: 'Search previous research to find inspiration for your project.' },
-            { step: '03', title: 'ANALYZE', desc: 'Upload your title and abstract for institutional verification.' },
-            { step: '04', title: 'ARCHIVE', desc: 'Secure your legacy in the official TUP digital library.' },
+            { step: '03', title: 'CHECK', desc: 'Upload your title and summary to get feedback.' },
+            { step: '04', title: 'SAVE', desc: 'Save your research in the official TUP digital library.' },
           ].map((item, i) => (
             <View key={i} style={styles.workflowCard}>
               <Text style={styles.workflowStepNum}>{item.step}</Text>
@@ -316,7 +350,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 10,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
@@ -357,7 +391,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 9,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    borderRadius: 4,
   },
   headerRegisterText: {
     color: Colors.background,
@@ -387,7 +421,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.65)',
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 44,
+    marginBottom: 24,
     fontWeight: '500',
     paddingHorizontal: 10,
   },
@@ -398,13 +432,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 18,
     paddingHorizontal: 32,
-    borderRadius: 20,
+    borderRadius: 4,
     width: '100%',
     maxWidth: 320,
     gap: 12,
     ...Platform.select({
-      ios: { shadowColor: Colors.primary, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 20 },
-      android: { elevation: 10 }
+      ios: { shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+      android: { elevation: 6 }
     }),
   },
   btnHeroPrimaryText: {
@@ -446,10 +480,10 @@ const styles = StyleSheet.create({
   featureTitleUnderline: {
     height: 3,
     width: 50,
-    borderRadius: 2,
+    borderRadius: 1,
   },
   featureCard: {
-    borderRadius: 24,
+    borderRadius: 4,
     padding: 20,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -458,7 +492,7 @@ const styles = StyleSheet.create({
   featureIconBox: {
     width: 56,
     height: 56,
-    borderRadius: 14,
+    borderRadius: 4,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -469,7 +503,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 4,
     marginBottom: 12,
   },
   featureBadgeText: {
@@ -534,7 +568,7 @@ const styles = StyleSheet.create({
   benefitCard: {
     backgroundColor: Colors.card,
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: Colors.border,
   },
@@ -581,7 +615,7 @@ const styles = StyleSheet.create({
   coreFuncIconBox: {
     width: 80,
     height: 80,
-    borderRadius: 24,
+    borderRadius: 6,
     backgroundColor: 'rgba(103,232,249,0.08)',
     borderWidth: 1,
     borderColor: 'rgba(103,232,249,0.15)',
@@ -619,7 +653,7 @@ const styles = StyleSheet.create({
   workflowCard: {
     backgroundColor: Colors.card,
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: Colors.border,
   },
@@ -646,11 +680,11 @@ const styles = StyleSheet.create({
   btnFooterPrimary: {
     backgroundColor: Colors.primary,
     paddingVertical: 18,
-    borderRadius: 16,
+    borderRadius: 4,
     alignItems: 'center',
     ...Platform.select({
-      ios: { shadowColor: Colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16 },
-      android: { elevation: 8 }
+      ios: { shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+      android: { elevation: 6 }
     }),
   },
   btnFooterPrimaryText: {

@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../../utils/Colors';
 
@@ -22,6 +23,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const CustomHeader = ({ onMenuPress, onSearch, searchQuery, onSearchChange }) => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const searchInputRef = React.useRef(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [history, setHistory] = useState([]);
@@ -87,13 +89,9 @@ const CustomHeader = ({ onMenuPress, onSearch, searchQuery, onSearchChange }) =>
   };
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { paddingTop: insets.top > 0 ? insets.top + 8 : 16 }]}>
       <StatusBar backgroundColor="transparent" translucent={true} barStyle="light-content" />
       
-      {/* Menu Button */}
-      <TouchableOpacity onPress={onMenuPress} style={styles.menuButton}>
-        <Ionicons name="menu" size={28} color="white" />
-      </TouchableOpacity>
 
       {/* Static Search Bar */}
       <View style={styles.searchWrapper}>
@@ -171,7 +169,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
     paddingHorizontal: 12,
-    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 12 : 40,
     paddingBottom: 12,
     zIndex: 1000,
   },

@@ -5,20 +5,21 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../../../utils/Colors';
 import CustomHeader from '../../Navigation/CustomHeader';
-import HamburgerMenu from '../../Navigation/HamburgerMenu';
+import GridMenu from '../../Navigation/GridMenu';
 import API_BASE_URL from '../../../api';
 
 const { width } = Dimensions.get('window');
 
 const AnalysisWorkspace = () => {
     const navigation = useNavigation();
+    const isFocused = useIsFocused();
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -270,7 +271,10 @@ const AnalysisWorkspace = () => {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
             />
-            <HamburgerMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+            {/* Grid Menu */}
+            {isFocused && (
+                <GridMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+            )}
 
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 

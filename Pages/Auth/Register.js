@@ -14,9 +14,20 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import API_BASE_URL from '../../api';
 import { useToast } from '../../utils/ToastContext';
 import Colors from '../../utils/Colors';
+
+const SECRET_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What is your mother's maiden name?",
+  "What was the name of your elementary school?",
+  "What city were you born in?",
+  "What is your oldest sibling's middle name?",
+  "What was the make of your first car?",
+  "What is the name of the street you grew up on?"
+];
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
@@ -28,27 +39,35 @@ const RegisterScreen = () => {
     confirmPassword: '',
     isGraduate: false,
     isProfessor: false,
+    secretQuestion: '',
+    secretAnswer: '',
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showSecretAnswer, setShowSecretAnswer] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
 
   const handleInputChange = (field, value) => {
     if (field === 'idNumber') {
-      let formattedValue = value.toUpperCase();
-      if (formattedValue.length < formData.idNumber.length) {
-        setFormData(prev => ({ ...prev, [field]: formattedValue }));
-        return;
+      const isStudent = !formData.isGraduate && !formData.isProfessor;
+      if (isStudent) {
+        let formattedValue = value.toUpperCase();
+        if (formattedValue.length < formData.idNumber.length) {
+          setFormData(prev => ({ ...prev, [field]: formattedValue }));
+          return;
+        }
+        let clean = formattedValue.replace(/[^A-Z0-9]/g, '');
+        if (clean.length > 0 && !clean.startsWith('TUPT')) clean = 'TUPT' + clean;
+        let result = clean;
+        if (clean.length > 4) result = clean.slice(0, 4) + '-' + clean.slice(4);
+        if (result.length > 7) result = result.slice(0, 7) + '-' + result.slice(7, 11);
+        setFormData(prev => ({ ...prev, [field]: result.slice(0, 12) }));
+      } else {
+        setFormData(prev => ({ ...prev, [field]: value }));
       }
-      let clean = formattedValue.replace(/[^A-Z0-9]/g, '');
-      if (clean.length > 0 && !clean.startsWith('TUPT')) clean = 'TUPT' + clean;
-      let result = clean;
-      if (clean.length > 4) result = clean.slice(0, 4) + '-' + clean.slice(4);
-      if (result.length > 7) result = result.slice(0, 7) + '-' + result.slice(7, 11);
-      setFormData(prev => ({ ...prev, [field]: result.slice(0, 12) }));
       return;
     }
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -68,37 +87,57 @@ const RegisterScreen = () => {
     }
   };
 
-  const validateIDNumber = (idNumber) => /^TUPT-\d{2}-\d{4}$/.test(idNumber);
+  const validateIDNumber = (idNumber) => {
+    const isStudent = !formData.isGraduate && !formData.isProfessor;
+    if (isStudent) {
+      return /^TUPT-\d{2}-\d{4}$/.test(idNumber);
+    }
+    return idNumber.trim().length > 0;
+  };
 
   const handleRegister = async () => {
-    const { fullName, idNumber, birthdate, password, confirmPassword } = formData;
-    if (!fullName || !idNumber || !birthdate || !password || !confirmPassword) {
-      toast.show('Please fill in all fields', 'error');
+    const { fullName, idNumber, birthdate, password, confirmPassword, secretQuestion, secretAnswer } = formData;
+    if (!fullName || !idNumber || !password || !confirmPassword) {
+      toast.show('Please fill in all required fields', 'error');
       return;
     }
     if (!validateIDNumber(idNumber)) {
-      toast.show('Please enter a valid ID number: TUPT-XX-XXXX', 'error');
+      const isStudent = !formData.isGraduate && !formData.isProfessor;
+      toast.show(isStudent ? 'Please enter a valid ID number: TUPT-XX-XXXX' : 'Please enter a valid ID number', 'error');
       return;
     }
 
-    // Age validation (Must be at least 18)
-    const today = new Date();
-    const birth = new Date(birthdate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-      age--;
+    // Age validation (Must be at least 18) - Only if birthdate is provided
+    if (birthdate) {
+      const today = new Date();
+      const birth = new Date(birthdate);
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        toast.show('You must be at least 18 years old to register', 'error');
+        return;
+      }
     }
-    if (age < 18) {
-      toast.show('Institutional access requires you to be at least 18 years old', 'error');
-      return;
-    }
+
     if (password !== confirmPassword) {
       toast.show('Passwords do not match', 'error');
       return;
     }
     if (password.length < 6) {
       toast.show('Password must be at least 6 characters', 'error');
+      return;
+    }
+
+    // Secret question validation: if one is provided, both must be
+    if (secretQuestion && !secretAnswer) {
+      toast.show('Please provide an answer to your secret question', 'error');
+      return;
+    }
+    if (secretAnswer && !secretQuestion) {
+      toast.show('Please select a secret question', 'error');
       return;
     }
 
@@ -110,10 +149,12 @@ const RegisterScreen = () => {
         body: JSON.stringify({
           name: fullName,
           idNumber,
-          birthdate,
+          birthdate: birthdate || null,
           password,
           isGraduate: formData.isGraduate,
-          isProfessor: formData.isProfessor
+          isProfessor: formData.isProfessor,
+          secretQuestion: secretQuestion || null,
+          secretAnswer: secretAnswer || null
         }),
       });
       const data = await response.json();
@@ -132,7 +173,17 @@ const RegisterScreen = () => {
   };
 
   const handleClear = () => {
-    setFormData({ fullName: '', idNumber: '', birthdate: '', password: '', confirmPassword: '', isGraduate: false, isProfessor: false });
+    setFormData({
+      fullName: '',
+      idNumber: '',
+      birthdate: '',
+      password: '',
+      confirmPassword: '',
+      isGraduate: false,
+      isProfessor: false,
+      secretQuestion: '',
+      secretAnswer: ''
+    });
   };
 
   return (
@@ -148,10 +199,10 @@ const RegisterScreen = () => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerEyebrow}>INSTITUTIONAL PORTAL</Text>
+            <Text style={styles.headerEyebrow}>TUP RESEARCH LIBRARY</Text>
             <Text style={styles.headerTitle}>CREATE ACCOUNT</Text>
             <View style={styles.headerAccentLine} />
-            <Text style={styles.headerSub}>Join the TUP research archive community</Text>
+            <Text style={styles.headerSub}>Join the TUP research community</Text>
           </View>
 
           {/* Card */}
@@ -172,86 +223,87 @@ const RegisterScreen = () => {
               </View>
             </View>
 
-            {/* ID Number */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>ID NUMBER</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="id-card-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="TUPT-XX-XXXX"
-                  placeholderTextColor={Colors.textDim}
-                  value={formData.idNumber}
-                  onChangeText={(v) => handleInputChange('idNumber', v)}
-                  autoCapitalize="characters"
-                  maxLength={12}
-                />
-              </View>
-            </View>
-
-            {/* Birthdate */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>BIRTHDATE</Text>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputWrapper} activeOpacity={0.7}>
-                <Ionicons name="calendar-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
-                <Text style={[styles.inputText, { color: formData.birthdate ? Colors.foreground : Colors.textDim }]}>
-                  {formData.birthdate || 'YYYY-MM-DD'}
-                </Text>
-              </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={handleDateChange}
-                  maximumDate={new Date()}
-                />
-              )}
-            </View>
-
+             {/* ID Number */}
              <View style={styles.inputGroup}>
-               <Text style={styles.label}>ACCOUNT TYPE</Text>
-               <View style={styles.radioGroup}>
-                 {['Student', 'Graduate', 'Professor'].map((role) => (
-                   <TouchableOpacity
-                     key={role}
-                     style={[
-                       styles.radioOption,
-                       (role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
-                       (role === 'Graduate' && formData.isGraduate) ||
-                       (role === 'Professor' && formData.isProfessor)
-                         ? styles.radioOptionActive
-                         : null
-                     ]}
-                     onPress={() => {
-                        if (role === 'Student') setFormData(prev => ({ ...prev, isGraduate: false, isProfessor: false }));
-                        else if (role === 'Graduate') setFormData(prev => ({ ...prev, isGraduate: true, isProfessor: false }));
-                        else if (role === 'Professor') setFormData(prev => ({ ...prev, isGraduate: false, isProfessor: true }));
-                     }}
-                     activeOpacity={0.7}
-                   >
-                     <View style={[
-                       styles.radioCircle,
-                       ((role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
-                       (role === 'Graduate' && formData.isGraduate) ||
-                       (role === 'Professor' && formData.isProfessor)) && styles.radioCircleChecked
-                     ]}>
-                       {((role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
-                       (role === 'Graduate' && formData.isGraduate) ||
-                       (role === 'Professor' && formData.isProfessor)) && (
-                         <View style={styles.radioInnerCircle} />
-                       )}
-                     </View>
-                     <Text style={[
-                        styles.radioLabel,
-                        ((role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
-                        (role === 'Graduate' && formData.isGraduate) ||
-                        (role === 'Professor' && formData.isProfessor)) && styles.radioLabelActive
-                     ]}>{role}</Text>
-                   </TouchableOpacity>
-                 ))}
+               <Text style={styles.label}>ID NUMBER</Text>
+               <View style={styles.inputWrapper}>
+                 <Ionicons name="id-card-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
+                 <TextInput
+                   style={styles.input}
+                   placeholder={(!formData.isGraduate && !formData.isProfessor) ? "TUPT-XX-XXXX" : "Enter your ID number"}
+                   placeholderTextColor={Colors.textDim}
+                   value={formData.idNumber}
+                   onChangeText={(v) => handleInputChange('idNumber', v)}
+                   autoCapitalize={(!formData.isGraduate && !formData.isProfessor) ? "characters" : "none"}
+                   maxLength={(!formData.isGraduate && !formData.isProfessor) ? 12 : 50}
+                 />
                </View>
              </View>
+ 
+             {/* Birthdate */}
+             <View style={styles.inputGroup}>
+               <Text style={styles.label}>BIRTHDATE (OPTIONAL)</Text>
+               <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputWrapper} activeOpacity={0.7}>
+                 <Ionicons name="calendar-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
+                 <Text style={[styles.inputText, { color: formData.birthdate ? Colors.foreground : Colors.textDim }]}>
+                   {formData.birthdate || 'YYYY-MM-DD'}
+                 </Text>
+               </TouchableOpacity>
+               {showDatePicker && (
+                 <DateTimePicker
+                   value={selectedDate}
+                   mode="date"
+                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                   onChange={handleDateChange}
+                   maximumDate={new Date()}
+                   textColor="#ffffff"
+                 />
+               )}
+             </View>
+ 
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>ACCOUNT TYPE</Text>
+                <View style={styles.radioGroup}>
+                  {['Student', 'Graduate', 'Professor'].map((role) => (
+                    <TouchableOpacity
+                      key={role}
+                      style={[
+                        styles.radioOption,
+                        (role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
+                        (role === 'Graduate' && formData.isGraduate) ||
+                        (role === 'Professor' && formData.isProfessor)
+                          ? styles.radioOptionActive
+                          : null
+                      ]}
+                      onPress={() => {
+                         if (role === 'Student') setFormData(prev => ({ ...prev, isGraduate: false, isProfessor: true ? false : false, idNumber: '' }));
+                         else if (role === 'Graduate') setFormData(prev => ({ ...prev, isGraduate: true, isProfessor: false, idNumber: '' }));
+                         else if (role === 'Professor') setFormData(prev => ({ ...prev, isGraduate: false, isProfessor: true, idNumber: '' }));
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[
+                        styles.radioCircle,
+                        ((role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
+                        (role === 'Graduate' && formData.isGraduate) ||
+                        (role === 'Professor' && formData.isProfessor)) && styles.radioCircleChecked
+                      ]}>
+                        {((role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
+                        (role === 'Graduate' && formData.isGraduate) ||
+                        (role === 'Professor' && formData.isProfessor)) && (
+                          <View style={styles.radioInnerCircle} />
+                        )}
+                      </View>
+                      <Text style={[
+                         styles.radioLabel,
+                         ((role === 'Student' && !formData.isGraduate && !formData.isProfessor) ||
+                         (role === 'Graduate' && formData.isGraduate) ||
+                         (role === 'Professor' && formData.isProfessor)) && styles.radioLabelActive
+                      ]}>{role}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
 
             {/* Password */}
             <View style={styles.inputGroup}>
@@ -290,6 +342,55 @@ const RegisterScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* Secret Question (Optional Recovery) */}
+            <View style={{ height: 1, backgroundColor: Colors.border, marginVertical: 10 }} />
+            
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: Colors.primary }]}>ACCOUNT RECOVERY (OPTIONAL)</Text>
+              <Text style={{ color: Colors.textDim, fontSize: 10, marginLeft: 4, marginBottom: 4 }}>
+                Set a secret question to recover your account without a birthdate.
+              </Text>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>SECRET QUESTION</Text>
+              <View style={[styles.inputWrapper, { height: Platform.OS === 'ios' ? 150 : 52, paddingHorizontal: 0, justifyContent: 'center' }]}>
+                <Picker
+                  selectedValue={formData.secretQuestion}
+                  onValueChange={(v) => handleInputChange('secretQuestion', v)}
+                  style={{ width: '100%', height: Platform.OS === 'ios' ? 150 : 52, color: Colors.foreground }}
+                  dropdownIconColor={Colors.primary}
+                  itemStyle={{ fontSize: 14, height: Platform.OS === 'ios' ? 150 : 52, color: Colors.foreground }}
+                >
+                  <Picker.Item label="— Select a question —" value="" color={Colors.textDim} />
+                  {SECRET_QUESTIONS.map((q, idx) => (
+                    <Picker.Item key={idx} label={q} value={q} color={Platform.OS === 'ios' ? '#ffffff' : '#000000'} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+
+            {formData.secretQuestion ? (
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>YOUR ANSWER</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="key-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
+                  <TextInput
+                    style={[styles.input, { flex: 1 }]}
+                    placeholder="Enter your answer"
+                    placeholderTextColor={Colors.textDim}
+                    value={formData.secretAnswer}
+                    onChangeText={(v) => handleInputChange('secretAnswer', v)}
+                    secureTextEntry={!showSecretAnswer}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity onPress={() => setShowSecretAnswer(!showSecretAnswer)} style={styles.eyeButton}>
+                    <Ionicons name={showSecretAnswer ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.textDim} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : null}
 
             {/* Action Row */}
             <View style={styles.buttonRow}>

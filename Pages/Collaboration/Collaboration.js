@@ -5,16 +5,18 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../Navigation/CustomHeader';
-import HamburgerMenu from '../Navigation/HamburgerMenu';
+import GridMenu from '../Navigation/GridMenu';
+import BottomNavBar from '../Navigation/BottomNavBar';
 import API_BASE_URL from '../../api';
 import Colors from '../../utils/Colors';
 import { useToast } from '../../utils/ToastContext';
 
 const CollaborationScreen = () => {
     const navigation = useNavigation();
+    const isFocused = useIsFocused();
     const toast = useToast();
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -132,7 +134,7 @@ const CollaborationScreen = () => {
                 </View>
                 <View style={{ flex: 1 }}>
                     <Text style={styles.cardUserName} numberOfLines={1}>{req.alumni?.name || 'Unknown'}</Text>
-                    <Text style={styles.cardUserRole}>ALUMNI / GRADUATE</Text>
+                    <Text style={styles.cardUserRole}>GRADUATE STUDENT</Text>
                 </View>
                 <View style={[styles.statusBadge, { borderColor: `${getStatusColor(req.status)}40`, backgroundColor: `${getStatusColor(req.status)}15` }]}>
                     <Ionicons name={getStatusIcon(req.status)} size={10} color={getStatusColor(req.status)} />
@@ -223,7 +225,10 @@ const CollaborationScreen = () => {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
             />
-            <HamburgerMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+            {/* Grid Menu */}
+            {isFocused && (
+                <GridMenu isVisible={isMenuVisible} onClose={() => setIsMenuVisible(false)} navigation={navigation} />
+            )}
 
             <ScrollView
                 style={styles.scrollView}
@@ -237,7 +242,7 @@ const CollaborationScreen = () => {
                             <Ionicons name="people" size={24} color={Colors.primary} />
                         </View>
                         <View>
-                            <Text style={styles.pageTitle}>COLLABORATION PORTAL</Text>
+                            <Text style={styles.pageTitle}>COLLABORATION HUB</Text>
                             <Text style={styles.pageSubtitle}>Research Collaboration</Text>
                         </View>
                     </View>
@@ -288,6 +293,9 @@ const CollaborationScreen = () => {
                     )}
                 </Animated.View>
             </ScrollView>
+
+            {/* Bottom Nav Bar */}
+            <BottomNavBar activeScreen="Collaboration" onGridPress={() => setIsMenuVisible(true)} />
         </LinearGradient>
     );
 };
@@ -295,7 +303,7 @@ const CollaborationScreen = () => {
 const styles = StyleSheet.create({
     container: { flex: 1 },
     scrollView: { flex: 1 },
-    scrollContent: { paddingHorizontal: 20, paddingTop: 30, paddingBottom: 60 },
+    scrollContent: { paddingHorizontal: 20, paddingTop: 30, paddingBottom: 110 },
 
     pageHeader: {
         flexDirection: 'row',
