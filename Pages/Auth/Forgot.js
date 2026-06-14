@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,12 @@ const ForgotScreen = () => {
     birthdate: '',
     newPassword: '',
     confirmPassword: '',
+    secretAnswer: '',
   });
+  const [isStudent, setIsStudent] = useState(true);
+  const [verificationMethod, setVerificationMethod] = useState('birthdate'); // 'birthdate' or 'secretQuestion'
+  const [secretQuestion, setSecretQuestion] = useState('');
+  const [showSecretAnswer, setShowSecretAnswer] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -33,19 +38,55 @@ const ForgotScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
 
-  const handleInputChange = (field, value) => {
-    if (field === 'idNumber') {
-      let formattedValue = value.toUpperCase();
-      if (formattedValue.length < formData.idNumber.length) {
-        setFormData(prev => ({ ...prev, [field]: formattedValue }));
+  useEffect(() => {
+    const fetchSecretQuestion = async () => {
+      const { idNumber } = formData;
+      if (!idNumber) {
+        setSecretQuestion('');
         return;
       }
-      let clean = formattedValue.replace(/[^A-Z0-9]/g, '');
-      if (clean.length > 0 && !clean.startsWith('TUPT')) clean = 'TUPT' + clean;
-      let result = clean;
-      if (clean.length > 4) result = clean.slice(0, 4) + '-' + clean.slice(4);
-      if (result.length > 7) result = result.slice(0, 7) + '-' + result.slice(7, 11);
-      setFormData(prev => ({ ...prev, [field]: result.slice(0, 12) }));
+      if (isStudent && idNumber.length < 12) {
+        setSecretQuestion('');
+        return;
+      }
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/secret-question/${idNumber}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSecretQuestion(data.secretQuestion);
+        } else {
+          setSecretQuestion('');
+        }
+      } catch (error) {
+        console.error("Error fetching secret question:", error);
+        setSecretQuestion('');
+      }
+    };
+
+    if (verificationMethod === 'secretQuestion') {
+      fetchSecretQuestion();
+    } else {
+      setSecretQuestion('');
+    }
+  }, [formData.idNumber, verificationMethod, isStudent]);
+
+  const handleInputChange = (field, value) => {
+    if (field === 'idNumber') {
+      if (isStudent) {
+        let formattedValue = value.toUpperCase();
+        if (formattedValue.length < formData.idNumber.length) {
+          setFormData(prev => ({ ...prev, [field]: formattedValue }));
+          return;
+        }
+        let clean = formattedValue.replace(/[^A-Z0-9]/g, '');
+        if (clean.length > 0 && !clean.startsWith('TUPT')) clean = 'TUPT' + clean;
+        let result = clean;
+        if (clean.length > 4) result = clean.slice(0, 4) + '-' + clean.slice(4);
+        if (result.length > 7) result = result.slice(0, 7) + '-' + result.slice(7, 11);
+        setFormData(prev => ({ ...prev, [field]: result.slice(0, 12) }));
+      } else {
+        setFormData(prev => ({ ...prev, [field]: value }));
+      }
       return;
     }
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -65,16 +106,29 @@ const ForgotScreen = () => {
     }
   };
 
-  const validateIDNumber = (idNumber) => /^TUPT-\d{2}-\d{4}$/.test(idNumber);
+  const validateIDNumber = (idNumber) => {
+    if (isStudent) {
+      return /^TUPT-\d{2}-\d{4}$/.test(idNumber);
+    }
+    return idNumber.trim().length > 0;
+  };
 
   const handleResetPassword = async () => {
-    const { idNumber, birthdate, newPassword, confirmPassword } = formData;
-    if (!idNumber || !birthdate || !newPassword || !confirmPassword) {
-      toast.show('Please fill in all fields', 'error');
+    const { idNumber, birthdate, newPassword, confirmPassword, secretAnswer } = formData;
+    if (!idNumber || !newPassword || !confirmPassword) {
+      toast.show('Please fill in all required fields', 'error');
       return;
     }
     if (!validateIDNumber(idNumber)) {
-      toast.show('Please enter a valid ID number: TUPT-XX-XXXX', 'error');
+      toast.show(isStudent ? 'Please enter a valid ID number: TUPT-XX-XXXX' : 'Please enter a valid ID number', 'error');
+      return;
+    }
+    if (verificationMethod === 'birthdate' && !birthdate) {
+      toast.show('Please select your birthdate', 'error');
+      return;
+    }
+    if (verificationMethod === 'secretQuestion' && !secretAnswer) {
+      toast.show('Please enter your secret answer', 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -88,10 +142,21 @@ const ForgotScreen = () => {
 
     setIsLoading(true);
     try {
+      const body = {
+        idNumber,
+        newPassword,
+        verificationMethod
+      };
+      if (verificationMethod === 'birthdate') {
+        body.birthdate = birthdate;
+      } else {
+        body.secretAnswer = secretAnswer;
+      }
+
       const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idNumber, birthdate, newPassword }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
       if (response.ok) {
@@ -108,7 +173,8 @@ const ForgotScreen = () => {
   };
 
   const handleClear = () => {
-    setFormData({ idNumber: '', birthdate: '', newPassword: '', confirmPassword: '' });
+    setFormData({ idNumber: '', birthdate: '', newPassword: '', confirmPassword: '', secretAnswer: '' });
+    setSecretQuestion('');
   };
 
   return (
@@ -128,7 +194,7 @@ const ForgotScreen = () => {
             <Text style={styles.headerTitle}>RESET PASSWORD</Text>
             <View style={styles.headerAccentLine} />
             <Text style={styles.headerSub}>
-              Verify your identity with your ID number and birthdate
+              Verify your identity to reset your password
             </Text>
           </View>
 
@@ -137,40 +203,142 @@ const ForgotScreen = () => {
 
             {/* ID Number */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>ID NUMBER</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.label}>ID NUMBER</Text>
+                <TouchableOpacity onPress={() => { setIsStudent(!isStudent); setFormData(p => ({ ...p, idNumber: '' })); }} activeOpacity={0.7}>
+                  <Text style={{ color: Colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>
+                    {isStudent ? 'NOT A STUDENT?' : 'ARE YOU A STUDENT?'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               <View style={styles.inputWrapper}>
                 <Ionicons name="id-card-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="TUPT-XX-XXXX"
+                  placeholder={isStudent ? "TUPT-XX-XXXX" : "Enter your ID number"}
                   placeholderTextColor={Colors.textDim}
                   value={formData.idNumber}
                   onChangeText={(v) => handleInputChange('idNumber', v)}
-                  autoCapitalize="characters"
-                  maxLength={12}
+                  autoCapitalize={isStudent ? "characters" : "none"}
+                  keyboardType="default"
+                  maxLength={isStudent ? 12 : 50}
                 />
               </View>
             </View>
 
-            {/* Birthdate */}
+            {/* Verification Method Toggle */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>BIRTHDATE (FOR VERIFICATION)</Text>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputWrapper} activeOpacity={0.7}>
-                <Ionicons name="calendar-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
-                <Text style={[styles.inputText, { color: formData.birthdate ? Colors.foreground : Colors.textDim }]}>
-                  {formData.birthdate || 'YYYY-MM-DD'}
-                </Text>
-              </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={handleDateChange}
-                  maximumDate={new Date()}
-                />
-              )}
+              <Text style={styles.label}>VERIFY IDENTITY USING</Text>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: verificationMethod === 'birthdate' ? 'rgba(45, 212, 191, 0.15)' : 'rgba(255,255,255,0.03)',
+                    borderWidth: 1.5,
+                    borderColor: verificationMethod === 'birthdate' ? Colors.primary : Colors.border,
+                    borderRadius: 12,
+                    paddingVertical: 12,
+                    gap: 6,
+                  }}
+                  onPress={() => setVerificationMethod('birthdate')}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="calendar-outline" size={14} color={verificationMethod === 'birthdate' ? Colors.primary : Colors.textDim} />
+                  <Text style={{ color: verificationMethod === 'birthdate' ? Colors.foreground : Colors.textDim, fontSize: 11, fontWeight: '700' }}>
+                    BIRTHDATE
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: verificationMethod === 'secretQuestion' ? 'rgba(45, 212, 191, 0.15)' : 'rgba(255,255,255,0.03)',
+                    borderWidth: 1.5,
+                    borderColor: verificationMethod === 'secretQuestion' ? Colors.primary : Colors.border,
+                    borderRadius: 12,
+                    paddingVertical: 12,
+                    gap: 6,
+                  }}
+                  onPress={() => setVerificationMethod('secretQuestion')}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="help-circle-outline" size={15} color={verificationMethod === 'secretQuestion' ? Colors.primary : Colors.textDim} />
+                  <Text style={{ color: verificationMethod === 'secretQuestion' ? Colors.foreground : Colors.textDim, fontSize: 11, fontWeight: '700' }}>
+                    SECRET QUESTION
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
+
+            {/* Birthdate Verification */}
+            {verificationMethod === 'birthdate' && (
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>BIRTHDATE (FOR VERIFICATION)</Text>
+                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputWrapper} activeOpacity={0.7}>
+                  <Ionicons name="calendar-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
+                  <Text style={[styles.inputText, { color: formData.birthdate ? Colors.foreground : Colors.textDim }]}>
+                    {formData.birthdate || 'YYYY-MM-DD'}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleDateChange}
+                    maximumDate={new Date()}
+                    textColor="#ffffff"
+                  />
+                )}
+              </View>
+            )}
+
+            {/* Secret Question Verification */}
+            {verificationMethod === 'secretQuestion' && (
+              <View style={{ gap: 18 }}>
+                <View style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: Colors.border }}>
+                  <Text style={{ color: Colors.textSecondary, fontSize: 11, fontWeight: '600', lineHeight: 16, marginBottom: 8 }}>
+                    Enter the answer to the secret question set during registration.
+                  </Text>
+                  {secretQuestion ? (
+                    <Text style={{ color: Colors.foreground, fontSize: 13, fontWeight: '700', fontStyle: 'italic' }}>
+                      "{secretQuestion}"
+                    </Text>
+                  ) : (
+                    <Text style={{ color: Colors.textDim, fontSize: 12, fontStyle: 'italic' }}>
+                      {formData.idNumber ? "No secret question found for this account." : "Enter your ID number to load secret question."}
+                    </Text>
+                  )}
+                </View>
+
+                {secretQuestion ? (
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>YOUR ANSWER</Text>
+                    <View style={styles.inputWrapper}>
+                      <Ionicons name="key-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
+                      <TextInput
+                        style={[styles.input, { flex: 1 }]}
+                        placeholder="Enter your secret answer"
+                        placeholderTextColor={Colors.textDim}
+                        value={formData.secretAnswer}
+                        onChangeText={(v) => handleInputChange('secretAnswer', v)}
+                        secureTextEntry={!showSecretAnswer}
+                        autoCapitalize="none"
+                      />
+                      <TouchableOpacity onPress={() => setShowSecretAnswer(!showSecretAnswer)} style={styles.eyeButton}>
+                        <Ionicons name={showSecretAnswer ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.textDim} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            )}
 
             {/* New Password */}
             <View style={styles.inputGroup}>

@@ -25,60 +25,51 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const [idNumber, setIdNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isStudent, setIsStudent] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
-
+ 
   const handleInputChange = (value) => {
-    let formattedValue = value.toUpperCase();
-    if (formattedValue.length < idNumber.length) {
-      setIdNumber(formattedValue);
-      return;
-    }
-    let clean = formattedValue.replace(/[^A-Z0-9]/g, '');
-    if (clean.length > 0 && !clean.startsWith('TUPT')) {
-      if (!'TUPT'.startsWith(clean)) {
-        clean = 'TUPT' + clean;
+    if (isStudent) {
+      let formattedValue = value.toUpperCase();
+      if (formattedValue.length < idNumber.length) {
+        setIdNumber(formattedValue);
+        return;
       }
-    }
-    let result = clean;
-    if (clean.length > 4) result = clean.slice(0, 4) + '-' + clean.slice(4);
-    if (result.length > 7) result = result.slice(0, 7) + '-' + result.slice(7, 11);
-    setIdNumber(result.slice(0, 12));
-  };
-
-  const validateIDNumber = (id) => {
-    const idRegex = /^TUPT-\d{2}-\d{4}$/;
-    return idRegex.test(id);
-  };
-
-  const handleDateChange = (event, date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (date) {
-      setSelectedDate(date);
-      if (Platform.OS !== 'ios') setShowDatePicker(false);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      setBirthdate(`${year}-${month}-${day}`);
+      let clean = formattedValue.replace(/[^A-Z0-9]/g, '');
+      if (clean.length > 0 && !clean.startsWith('TUPT')) {
+        if (!'TUPT'.startsWith(clean)) {
+          clean = 'TUPT' + clean;
+        }
+      }
+      let formatted = clean;
+      if (clean.length > 4) formatted = clean.slice(0, 4) + '-' + clean.slice(4);
+      if (formatted.length > 7) formatted = formatted.slice(0, 7) + '-' + formatted.slice(7, 11);
+      setIdNumber(formatted.slice(0, 12));
     } else {
-      setShowDatePicker(false);
+      setIdNumber(value);
     }
   };
-
+ 
+  const validateIDNumber = (id) => {
+    if (isStudent) {
+      const idRegex = /^TUPT-\d{2}-\d{4}$/;
+      return idRegex.test(id);
+    }
+    return id.trim().length > 0;
+  };
+ 
   const handleLogin = async () => {
     if (!idNumber || !password) {
       toast.show('Please fill in all fields', 'error');
       return;
     }
     if (!validateIDNumber(idNumber)) {
-      toast.show('Please enter a valid ID number format: TUPT-XX-XXXX', 'error');
+      toast.show(isStudent ? 'Please enter a valid ID number format: TUPT-XX-XXXX' : 'Please enter a valid ID number', 'error');
       return;
     }
-
+ 
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -143,17 +134,25 @@ const LoginScreen = () => {
           <View style={styles.card}>
             {/* ID Number */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>ID NUMBER</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.label}>ID NUMBER</Text>
+                <TouchableOpacity onPress={() => { setIsStudent(!isStudent); setIdNumber(''); }} activeOpacity={0.7}>
+                  <Text style={{ color: Colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>
+                    {isStudent ? 'NOT A STUDENT?' : 'ARE YOU A STUDENT?'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
               <View style={styles.inputWrapper}>
                 <Ionicons name="id-card-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="TUPT-XX-XXXX"
+                  placeholder={isStudent ? "TUPT-XX-XXXX" : "Enter your ID number"}
                   placeholderTextColor={Colors.textDim}
                   value={idNumber}
                   onChangeText={handleInputChange}
-                  autoCapitalize="characters"
+                  autoCapitalize={isStudent ? "characters" : "none"}
                   keyboardType="default"
+                  maxLength={isStudent ? 12 : 50}
                 />
               </View>
             </View>
@@ -176,27 +175,6 @@ const LoginScreen = () => {
                   <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={Colors.textDim} />
                 </TouchableOpacity>
               </View>
-            </View>
-
-            {/* Birthdate */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>BIRTHDATE</Text>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputWrapper} activeOpacity={0.7}>
-                <Ionicons name="calendar-outline" size={16} color={Colors.primary} style={styles.inputIcon} />
-                <Text style={[styles.inputText, { color: birthdate ? Colors.foreground : Colors.textDim }]}>
-                  {birthdate || 'YYYY-MM-DD'}
-                </Text>
-              </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={handleDateChange}
-                  maximumDate={new Date()}
-                  textColor="#ffffff"
-                />
-              )}
             </View>
 
             {/* Submit */}
