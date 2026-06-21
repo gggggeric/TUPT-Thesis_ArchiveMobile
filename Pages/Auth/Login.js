@@ -83,7 +83,11 @@ const LoginScreen = () => {
         await AsyncStorage.setItem('userData', JSON.stringify(userData));
         if (data.token) await AsyncStorage.setItem('userToken', data.token);
         toast.show(data.message || 'Logged in successfully!', 'success');
-        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+        if (userData.isAdmin) {
+          navigation.reset({ index: 0, routes: [{ name: 'AdminDashboard' }] });
+        } else {
+          navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+        }
       } else {
         toast.show(data.message || 'Login failed', 'error');
       }

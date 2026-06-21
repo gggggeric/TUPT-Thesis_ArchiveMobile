@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Dimensions, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../Navigation/CustomHeader';
 import GridMenu from '../Navigation/GridMenu';
 import BottomNavBar from '../Navigation/BottomNavBar';
@@ -14,6 +15,33 @@ const DocumentsHub = () => {
     const navigation = useNavigation();
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        const checkUserRole = async () => {
+            try {
+                const userData = await AsyncStorage.getItem('userData');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    if (user.isProfessor) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Faculty members cannot access the Documents Hub. You have been redirected to Faculty Approvals."
+                        );
+                        navigation.navigate('Approvals');
+                    } else if (user.isAdmin) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Admin administrative tools are available on the web portal. Mobile access is restricted to search, stats, and profile viewing."
+                        );
+                        navigation.navigate('AdminDashboard');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        checkUserRole();
+    }, []);
 
     const handleSearch = () => {
         if (searchQuery.trim()) {

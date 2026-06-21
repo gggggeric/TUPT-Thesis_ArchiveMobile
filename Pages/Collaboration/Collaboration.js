@@ -41,6 +41,24 @@ const CollaborationScreen = () => {
             const userData = await AsyncStorage.getItem('userData');
             if (userData) {
                 const user = JSON.parse(userData);
+                
+                // Guard: check if Professor or Admin
+                if (user.isProfessor) {
+                    Alert.alert(
+                        "Access Denied",
+                        "Faculty members cannot access the student Collaboration Hub. You have been redirected to Faculty Approvals."
+                    );
+                    navigation.navigate('Approvals');
+                    return;
+                } else if (user.isAdmin) {
+                    Alert.alert(
+                        "Access Denied",
+                        "Admin administrative tools are available on the web portal. Mobile access is restricted to search, stats, and profile viewing."
+                    );
+                    navigation.navigate('AdminDashboard');
+                    return;
+                }
+
                 setCurrentUser(user);
                 fetchData(user);
             }

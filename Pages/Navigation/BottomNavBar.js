@@ -186,14 +186,20 @@ const BottomNavBar = ({ activeScreen, onGridPress }) => {
   return (
     <View style={styles.outerContainer}>
       <View style={styles.barContainer}>
-        {/* Tab 1: Home */}
-        {renderTab('Home', 'home', 'home-outline')}
-
-        {/* Tab 2: Collaboration or Approvals */}
-        {currentUser?.isProfessor ? (
-          renderTab('Approvals', 'checkmark-circle', 'checkmark-circle-outline')
+        {currentUser?.isAdmin ? (
+          renderTab('AdminDashboard', 'grid', 'grid-outline')
         ) : (
-          renderTab('Collaboration', 'chatbubble', 'chatbubble-outline')
+          <>
+            {/* Tab 1: Home */}
+            {renderTab('Home', 'home', 'home-outline')}
+
+            {/* Tab 2: Collaboration or Approvals */}
+            {currentUser?.isProfessor ? (
+              renderTab('Approvals', 'checkmark-circle', 'checkmark-circle-outline')
+            ) : (
+              renderTab('Collaboration', 'chatbubble', 'chatbubble-outline')
+            )}
+          </>
         )}
 
         {/* Tab 3: Notifications */}

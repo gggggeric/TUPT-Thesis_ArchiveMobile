@@ -15,6 +15,10 @@ import AnalysisWorkspaceScreen from './Pages/Documents/Analysis/AnalysisWorkspac
 import SearchResultScreen from './Pages/Search/SearchResult';
 import CollaborationScreen from './Pages/Collaboration/Collaboration';
 import ApprovalsScreen from './Pages/User/Approvals';
+import AdminDashboardScreen from './Pages/Admin/AdminDashboard';
+import ManageThesesScreen from './Pages/Admin/ManageTheses';
+import ManageUsersScreen from './Pages/Admin/ManageUsers';
+import ManageCollaborationsScreen from './Pages/Admin/ManageCollaborations';
 import DocumentsHubScreen from './Pages/Documents/DocumentsHub';
 import MySubmissionsScreen from './Pages/Documents/Submissions/MySubmissions';
 import SubmitThesisScreen from './Pages/Documents/Submit/SubmitThesis';
@@ -48,8 +52,12 @@ export default function App() {
           <Stack.Screen name="AnalysisWorkspace" component={AnalysisWorkspaceScreen} />
           <Stack.Screen name="SearchResult" component={SearchResultScreen} />
           <Stack.Screen name="Collaboration" component={CollaborationScreen} />
-          <Stack.Screen name="Approvals" component={ApprovalsScreen} />
-          <Stack.Screen name="DocumentsHub" component={DocumentsHubScreen} />
+           <Stack.Screen name="Approvals" component={ApprovalsScreen} />
+           <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+           <Stack.Screen name="ManageTheses" component={ManageThesesScreen} />
+           <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
+           <Stack.Screen name="ManageCollaborations" component={ManageCollaborationsScreen} />
+           <Stack.Screen name="DocumentsHub" component={DocumentsHubScreen} />
           <Stack.Screen name="MySubmissions" component={MySubmissionsScreen} />
           <Stack.Screen name="SubmitThesis" component={SubmitThesisScreen} />
         </Stack.Navigator>

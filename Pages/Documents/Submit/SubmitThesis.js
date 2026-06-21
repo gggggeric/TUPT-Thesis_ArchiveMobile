@@ -51,7 +51,33 @@ const SubmitThesis = () => {
     });
 
     React.useEffect(() => {
-        fetchProfessors();
+        const checkUserRole = async () => {
+            try {
+                const userData = await AsyncStorage.getItem('userData');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    if (user.isProfessor) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Faculty members cannot access the Submit Thesis page. You have been redirected to Faculty Approvals."
+                        );
+                        navigation.navigate('Approvals');
+                        return;
+                    } else if (user.isAdmin) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Admin administrative tools are available on the web portal. Mobile access is restricted to search, stats, and profile viewing."
+                        );
+                        navigation.navigate('AdminDashboard');
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            fetchProfessors();
+        };
+        checkUserRole();
     }, []);
 
     const fetchProfessors = async () => {

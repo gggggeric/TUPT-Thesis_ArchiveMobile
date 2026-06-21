@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    Platform, ActivityIndicator, RefreshControl,
+    Platform, ActivityIndicator, RefreshControl, Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,7 +21,35 @@ const MySubmissions = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => { fetchTheses(); }, []);
+    useEffect(() => {
+        const checkUserRole = async () => {
+            try {
+                const userData = await AsyncStorage.getItem('userData');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    if (user.isProfessor) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Faculty members cannot access the submissions page. You have been redirected to Faculty Approvals."
+                        );
+                        navigation.navigate('Approvals');
+                        return;
+                    } else if (user.isAdmin) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Admin administrative tools are available on the web portal. Mobile access is restricted to search, stats, and profile viewing."
+                        );
+                        navigation.navigate('AdminDashboard');
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            fetchTheses();
+        };
+        checkUserRole();
+    }, []);
 
     const fetchTheses = async () => {
         setIsLoading(true);
