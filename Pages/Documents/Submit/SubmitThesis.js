@@ -93,7 +93,7 @@ const SubmitThesis = () => {
 
             if (res.ok) {
                 Alert.alert('Success', 'Thesis submitted for approval!', [
-                    { text: 'OK', onPress: () => navigation.navigate('DocumentsHub') }
+                    { text: 'OK', onPress: () => navigation.navigate('MySubmissions') }
                 ]);
             } else {
                 const data = await res.json();
@@ -126,9 +126,9 @@ const SubmitThesis = () => {
 
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 {/* Back Button */}
-                <TouchableOpacity style={styles.backRow} onPress={() => navigation.navigate('DocumentsHub')}>
+                <TouchableOpacity style={styles.backRow} onPress={() => navigation.navigate('Home')}>
                     <Ionicons name="arrow-back" size={16} color={Colors.primary} />
-                    <Text style={styles.backText}>Back to Documents</Text>
+                    <Text style={styles.backText}>Back to Dashboard</Text>
                 </TouchableOpacity>
 
                 {/* Form Card */}
@@ -221,7 +221,7 @@ const SubmitThesis = () => {
 
                     {/* Buttons */}
                     <View style={styles.formActions}>
-                        <TouchableOpacity style={styles.cancelBtn} onPress={() => navigation.navigate('DocumentsHub')}>
+                        <TouchableOpacity style={styles.cancelBtn} onPress={() => navigation.navigate('Home')}>
                             <Text style={styles.cancelBtnText}>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity

@@ -69,9 +69,9 @@ const MySubmissions = () => {
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchTheses(); }} tintColor={Colors.primary} />}
             >
                 {/* Back Button */}
-                <TouchableOpacity style={styles.backRow} onPress={() => navigation.navigate('DocumentsHub')}>
+                <TouchableOpacity style={styles.backRow} onPress={() => navigation.navigate('Home')}>
                     <Ionicons name="arrow-back" size={16} color={Colors.primary} />
-                    <Text style={styles.backText}>Back to Documents</Text>
+                    <Text style={styles.backText}>Back to Dashboard</Text>
                 </TouchableOpacity>
 
                 {/* Header */}
