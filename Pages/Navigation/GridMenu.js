@@ -99,11 +99,15 @@ const GridMenu = ({ isVisible, onClose, navigation }) => {
     }
   };
 
-  const gridItems = [
+  const gridItems = user?.isProfessor ? [
+    // Professors: only Approvals and Profile (Home is already in the bottom bar)
+    { icon: 'checkmark-circle', iconOutline: 'checkmark-circle-outline', label: 'Approvals', screen: 'Approvals' },
+    { icon: 'person', iconOutline: 'person-outline', label: 'Profile', screen: 'Profile' },
+  ] : [
+    // All other users: full menu
     { icon: 'home', iconOutline: 'home-outline', label: 'Home', screen: 'Home' },
     { icon: 'chatbubbles', iconOutline: 'chatbubbles-outline', label: 'Collaboration', screen: 'Collaboration' },
     { icon: 'folder', iconOutline: 'folder-outline', label: 'Submissions', screen: 'MySubmissions' },
-    ...(user?.isProfessor ? [{ icon: 'checkmark-circle', iconOutline: 'checkmark-circle-outline', label: 'Approvals', screen: 'Approvals' }] : []),
     { icon: 'person', iconOutline: 'person-outline', label: 'Profile', screen: 'Profile' },
   ];
 

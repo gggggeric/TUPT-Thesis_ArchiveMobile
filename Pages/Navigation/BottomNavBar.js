@@ -12,6 +12,7 @@ const BottomNavBar = ({ activeScreen, onGridPress }) => {
   const navigation = useNavigation();
 
   // Notification states
+  const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -23,9 +24,13 @@ const BottomNavBar = ({ activeScreen, onGridPress }) => {
   const initNotifications = async () => {
     try {
       const userToken = await AsyncStorage.getItem('userToken');
+      const userData = await AsyncStorage.getItem('userData');
       if (userToken) {
         setToken(userToken);
         fetchNotifications(userToken);
+      }
+      if (userData) {
+        setCurrentUser(JSON.parse(userData));
       }
     } catch (err) {
       console.log('Error initializing notifications:', err);
@@ -184,8 +189,12 @@ const BottomNavBar = ({ activeScreen, onGridPress }) => {
         {/* Tab 1: Home */}
         {renderTab('Home', 'home', 'home-outline')}
 
-        {/* Tab 2: Collaboration */}
-        {renderTab('Collaboration', 'chatbubble', 'chatbubble-outline')}
+        {/* Tab 2: Collaboration or Approvals */}
+        {currentUser?.isProfessor ? (
+          renderTab('Approvals', 'checkmark-circle', 'checkmark-circle-outline')
+        ) : (
+          renderTab('Collaboration', 'chatbubble', 'chatbubble-outline')
+        )}
 
         {/* Tab 3: Notifications */}
         {token ? (
