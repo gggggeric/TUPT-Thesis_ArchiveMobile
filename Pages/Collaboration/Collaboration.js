@@ -275,7 +275,7 @@ const CollaborationScreen = () => {
                                     <Ionicons name="people-outline" size={40} color={Colors.textDim} />
                                 </View>
                                 <Text style={styles.emptyText}>No collaboration requests sent yet.</Text>
-                                <Text style={styles.emptySubText}>Find a thesis and send a collaboration request from its detail page.</Text>
+                                <Text style={styles.emptySubText}>Your request for collaboration will show here.</Text>
                             </View>
                         )
                     ) : (
@@ -287,7 +287,7 @@ const CollaborationScreen = () => {
                                     <Ionicons name="mail-outline" size={40} color={Colors.textDim} />
                                 </View>
                                 <Text style={styles.emptyText}>No incoming requests found.</Text>
-                                <Text style={styles.emptySubText}>When a graduate student requests to collaborate on your thesis, it will appear here.</Text>
+                                <Text style={styles.emptySubText}>Your request for collaboration will show here.</Text>
                             </View>
                         )
                     )}

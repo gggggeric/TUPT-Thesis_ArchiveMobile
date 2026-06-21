@@ -199,10 +199,10 @@ const RegisterScreen = () => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerEyebrow}>TUP RESEARCH LIBRARY</Text>
+            <Text style={styles.headerEyebrow}>TUPT-THESIS ARCHIVE</Text>
             <Text style={styles.headerTitle}>CREATE ACCOUNT</Text>
             <View style={styles.headerAccentLine} />
-            <Text style={styles.headerSub}>Join the TUP research community</Text>
+            <Text style={styles.headerSub}>Join the TUPT-Thesis Archive community</Text>
           </View>
 
           {/* Card */}

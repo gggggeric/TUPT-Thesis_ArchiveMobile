@@ -246,7 +246,7 @@ const ThesisDetailScreen = () => {
                     <Text style={styles.letterheadTitle}>Technological University of the Philippines</Text>
                     <Text style={styles.letterheadSubtitle}>Taguig City Campus</Text>
                     <View style={styles.letterheadDivider} />
-                    <Text style={styles.letterheadFooter}>Office of the University Registrar • TUP Research Library</Text>
+                    <Text style={styles.letterheadFooter}>Office of the University Registrar • TUPT-Thesis Archive</Text>
                     
                     {/* Archive Stamp */}
                     <View style={styles.archiveStamp}>

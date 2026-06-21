@@ -15,6 +15,9 @@ import AnalysisWorkspaceScreen from './Pages/Documents/Analysis/AnalysisWorkspac
 import SearchResultScreen from './Pages/Search/SearchResult';
 import CollaborationScreen from './Pages/Collaboration/Collaboration';
 import ApprovalsScreen from './Pages/User/Approvals';
+import DocumentsHubScreen from './Pages/Documents/DocumentsHub';
+import MySubmissionsScreen from './Pages/Documents/Submissions/MySubmissions';
+import SubmitThesisScreen from './Pages/Documents/Submit/SubmitThesis';
 import { ToastProvider } from './utils/ToastContext';
 import API_BASE_URL from './api';
 
@@ -46,6 +49,9 @@ export default function App() {
           <Stack.Screen name="SearchResult" component={SearchResultScreen} />
           <Stack.Screen name="Collaboration" component={CollaborationScreen} />
           <Stack.Screen name="Approvals" component={ApprovalsScreen} />
+          <Stack.Screen name="DocumentsHub" component={DocumentsHubScreen} />
+          <Stack.Screen name="MySubmissions" component={MySubmissionsScreen} />
+          <Stack.Screen name="SubmitThesis" component={SubmitThesisScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ToastProvider>

@@ -21,6 +21,7 @@ import BottomNavBar from './Navigation/BottomNavBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_BASE_URL from '../api';
 import Colors from '../utils/Colors';
+import { registerForPushNotificationsAsync } from '../utils/pushNotifications';
 
 const { width, height } = Dimensions.get('window');
 
@@ -49,6 +50,11 @@ const HomeScreen = () => {
 
     // Selected AI Modal
     const [selectedAiItem, setSelectedAiItem] = useState(null);
+
+    // Register for push notifications on mount
+    useEffect(() => {
+        registerForPushNotificationsAsync();
+    }, []);
 
     // Load Data whenever screen comes into focus
     useEffect(() => {

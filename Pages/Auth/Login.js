@@ -122,11 +122,11 @@ const LoginScreen = () => {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerEyebrow}>TUP RESEARCH LIBRARY</Text>
+            <Text style={styles.headerEyebrow}>TUPT-THESIS ARCHIVE</Text>
             <Text style={styles.headerTitle}>SIGN IN</Text>
             <View style={styles.headerAccentLine} />
             <Text style={styles.headerSub}>
-              Sign in to your TUP research account
+              Sign in to your TUPT-Thesis Archive account
             </Text>
           </View>
 

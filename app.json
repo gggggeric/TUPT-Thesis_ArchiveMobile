@@ -2,7 +2,7 @@
   "expo": {
     "name": "TUPT-Thesis-Archive",
     "slug": "mobile",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "orientation": "portrait",
     "icon": "./assets/tup-logo.png",
     "userInterfaceStyle": "light",
