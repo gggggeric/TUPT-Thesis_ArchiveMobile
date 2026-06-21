@@ -10,7 +10,8 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
-  Linking
+  Linking,
+  Modal
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -506,8 +507,13 @@ const HomeScreen = () => {
             </ScrollView>
 
             {/* Selected AI Modal */}
-            {selectedAiItem && (
-                <View style={[StyleSheet.absoluteFill, styles.modalOverlay]}>
+            <Modal
+                visible={!!selectedAiItem}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setSelectedAiItem(null)}
+            >
+                <View style={styles.modalOverlay}>
                      <View style={styles.modalContent}>
                           <TouchableOpacity 
                               style={styles.modalCloseBtn}
@@ -522,19 +528,19 @@ const HomeScreen = () => {
                                </View>
                                <View style={styles.modalHeaderTextFlex}>
                                    <Text style={styles.modalTitle}>AI Title Recommendation</Text>
-                                   <Text style={styles.modalSubtitle}>TAILORED TO: "{selectedAiItem.prompt}"</Text>
+                                   <Text style={styles.modalSubtitle}>TAILORED TO: "{selectedAiItem?.prompt}"</Text>
                                </View>
                           </View>
 
                           <View style={styles.modalScrollBodyArea}>
                               <ScrollView contentContainerStyle={{ padding: 20 }}>
-                                  {renderRecommendationText(selectedAiItem.recommendation)}
+                                  {selectedAiItem && renderRecommendationText(selectedAiItem.recommendation)}
                               </ScrollView>
                           </View>
 
                      </View>
                 </View>
-            )}
+            </Modal>
 
             {/* Bottom Nav Bar */}
             <BottomNavBar activeScreen="Home" onGridPress={() => setIsMenuVisible(true)} />
@@ -760,11 +766,11 @@ const styles = StyleSheet.create({
 
     // Modal Overlays
     modalOverlay: {
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.85)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        zIndex: 100,
     },
     modalContent: {
         backgroundColor: Colors.card,
