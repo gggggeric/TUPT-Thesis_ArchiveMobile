@@ -99,11 +99,21 @@ const GridMenu = ({ isVisible, onClose, navigation }) => {
     }
   };
 
-  const gridItems = [
+  const gridItems = user?.isProfessor ? [
+    // Professors: only Approvals and Profile (Home is already in the bottom bar)
+    { icon: 'checkmark-circle', iconOutline: 'checkmark-circle-outline', label: 'Approvals', screen: 'Approvals' },
+    { icon: 'person', iconOutline: 'person-outline', label: 'Profile', screen: 'Profile' },
+  ] : user?.isAdmin ? [
+    // Admins: View Thesis, View Users, View Collaborations, Profile (Dashboard is in bottom nav bar hot seat)
+    { icon: 'document-text', iconOutline: 'document-text-outline', label: 'View Theses', screen: 'ManageTheses' },
+    { icon: 'people', iconOutline: 'people-outline', label: 'View Users', screen: 'ManageUsers' },
+    { icon: 'git-pull-request', iconOutline: 'git-pull-request-outline', label: 'View Collabs', screen: 'ManageCollaborations' },
+    { icon: 'person', iconOutline: 'person-outline', label: 'Profile', screen: 'Profile' },
+  ] : [
+    // All other users (Alumni, Student): full menu
     { icon: 'home', iconOutline: 'home-outline', label: 'Home', screen: 'Home' },
     { icon: 'chatbubbles', iconOutline: 'chatbubbles-outline', label: 'Collaboration', screen: 'Collaboration' },
     { icon: 'folder', iconOutline: 'folder-outline', label: 'Submissions', screen: 'MySubmissions' },
-    ...(user?.isProfessor ? [{ icon: 'checkmark-circle', iconOutline: 'checkmark-circle-outline', label: 'Approvals', screen: 'Approvals' }] : []),
     { icon: 'person', iconOutline: 'person-outline', label: 'Profile', screen: 'Profile' },
   ];
 

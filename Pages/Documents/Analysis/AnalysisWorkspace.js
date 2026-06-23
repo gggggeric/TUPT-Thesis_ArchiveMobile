@@ -37,7 +37,35 @@ const AnalysisWorkspace = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [activeIssueId, setActiveIssueId] = useState(null);
 
-    useEffect(() => { fetchDrafts(); }, []);
+    useEffect(() => {
+        const checkUserRole = async () => {
+            try {
+                const userData = await AsyncStorage.getItem('userData');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    if (user.isProfessor) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Faculty members cannot access the Analysis Workspace. You have been redirected to Faculty Approvals."
+                        );
+                        navigation.navigate('Approvals');
+                        return;
+                    } else if (user.isAdmin) {
+                        Alert.alert(
+                            "Access Denied",
+                            "Admin administrative tools are available on the web portal. Mobile access is restricted to search, stats, and profile viewing."
+                        );
+                        navigation.navigate('AdminDashboard');
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            fetchDrafts();
+        };
+        checkUserRole();
+    }, []);
 
     const fetchDrafts = async () => {
         try {
@@ -279,9 +307,9 @@ const AnalysisWorkspace = () => {
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
                 {/* Back Button */}
-                <TouchableOpacity style={styles.backRow} onPress={() => navigation.navigate('DocumentsHub')}>
-                    <Ionicons name="arrow-back" size={16} color="#fca5a5" />
-                    <Text style={styles.backText}>Back to Documents</Text>
+                <TouchableOpacity style={styles.backRow} onPress={() => navigation.navigate('Home')}>
+                    <Ionicons name="arrow-back" size={16} color={Colors.primary} />
+                    <Text style={styles.backText}>Back to Dashboard</Text>
                 </TouchableOpacity>
 
                 {/* If no results yet, show upload UI */}
@@ -565,8 +593,8 @@ const styles = StyleSheet.create({
     container: { flex: 1 },
     scroll: { flex: 1 },
     scrollContent: { paddingTop: 20, paddingBottom: 60, paddingHorizontal: 20 },
-    backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 24 },
-    backText: { fontSize: 13, fontWeight: '600', color: '#fca5a5' },
+    backRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 20 },
+    backText: { color: Colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 2, textTransform: 'uppercase' },
 
     // Hero
     heroSection: { marginBottom: 32 },

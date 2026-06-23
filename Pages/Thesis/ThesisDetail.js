@@ -246,7 +246,7 @@ const ThesisDetailScreen = () => {
                     <Text style={styles.letterheadTitle}>Technological University of the Philippines</Text>
                     <Text style={styles.letterheadSubtitle}>Taguig City Campus</Text>
                     <View style={styles.letterheadDivider} />
-                    <Text style={styles.letterheadFooter}>Office of the University Registrar • TUP Research Library</Text>
+                    <Text style={styles.letterheadFooter}>Office of the University Registrar • TUPT-Thesis Archive</Text>
                     
                     {/* Archive Stamp */}
                     <View style={styles.archiveStamp}>
@@ -582,6 +582,33 @@ const modalStyles = StyleSheet.create({
     applyBtnText: { color: Colors.background, fontWeight: 'bold' },
 });
 
+const renderFormattedText = (text, customTextStyle = {}) => {
+  if (!text) return null;
+  if (typeof text !== 'string') return <Text style={customTextStyle}>{text}</Text>;
+  
+  const lines = text.split('\n');
+  return lines.map((line, lineIdx) => {
+    const processedLine = line.replace(/^\s*\*\s/, '• ').replace(/^\s*-\s/, '• ');
+    const parts = processedLine.split(/(\*\*.*?\*\*)/g);
+    
+    return (
+      <Text key={lineIdx} style={[{ fontSize: 14, color: Colors.textSecondary, lineHeight: 24 }, customTextStyle]}>
+        {parts.map((part, i) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <Text key={i} style={{ fontWeight: '900', color: Colors.foreground }}>
+                {part.slice(2, -2)}
+              </Text>
+            );
+          }
+          return <Text key={i}>{part}</Text>;
+        })}
+        {lineIdx < lines.length - 1 ? '\n' : ''}
+      </Text>
+    );
+  });
+};
+
 const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
   const isSimilarity = type === 'similarity';
   
@@ -646,7 +673,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                         <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>AI Suggestion</Text>
                       </View>
                       <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border }}>
-                        <Text style={{ fontSize: 14, color: Colors.textSecondary, lineHeight: 24 }}>{data.recommendation}</Text>
+                        {renderFormattedText(data.recommendation)}
                       </View>
                     </View>
                   </>
@@ -657,7 +684,7 @@ const IntelligenceModal = ({ visible, onClose, isLoading, data, type }) => {
                       <Text style={{ fontSize: 13, fontWeight: '900', color: Colors.foreground, textTransform: 'uppercase', letterSpacing: 1 }}>AI Suggestions</Text>
                     </View>
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 20, borderWidth: 1, borderColor: Colors.border }}>
-                      <Text style={{ fontSize: 14, color: Colors.textSecondary, lineHeight: 24 }}>{data}</Text>
+                      {renderFormattedText(data)}
                     </View>
                   </View>
                 )}

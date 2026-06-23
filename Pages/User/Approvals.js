@@ -171,9 +171,9 @@ const Approvals = () => {
                                 <View style={styles.categoryPill}>
                                     <Text style={styles.categoryPillText}>{thesis.course || 'General'}</Text>
                                 </View>
-                                <View style={[styles.statusPill, thesis.isApproved ? styles.statusApproved : styles.statusPending]}>
-                                    <Text style={[styles.statusPillText, thesis.isApproved ? styles.statusApprovedText : styles.statusPendingText]}>
-                                        {thesis.isApproved ? 'Approved' : 'Pending'}
+                                <View style={[styles.statusPill, thesis.isProfApproved ? styles.statusApproved : styles.statusPending]}>
+                                    <Text style={[styles.statusPillText, thesis.isProfApproved ? styles.statusApprovedText : styles.statusPendingText]}>
+                                        {thesis.isProfApproved ? 'Approved' : 'Pending'}
                                     </Text>
                                 </View>
                             </View>
@@ -209,14 +209,16 @@ const Approvals = () => {
                                         <Text style={styles.rejectBtnText}>Reject</Text>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity
-                                        style={[styles.approveBtn, (thesis.isApproved || processingId === thesis._id) && { opacity: 0.5 }]}
-                                        onPress={() => handleApprove(thesis._id, thesis.title)}
-                                        disabled={thesis.isApproved || processingId === thesis._id}
-                                    >
-                                        <Ionicons name="checkmark" size={16} color="#fff" />
-                                        <Text style={styles.approveBtnText}>{thesis.isApproved ? 'Approved' : 'Approve'}</Text>
-                                    </TouchableOpacity>
+                                    {!thesis.isProfApproved && (
+                                        <TouchableOpacity
+                                            style={[styles.approveBtn, processingId === thesis._id && { opacity: 0.5 }]}
+                                            onPress={() => handleApprove(thesis._id, thesis.title)}
+                                            disabled={processingId === thesis._id}
+                                        >
+                                            <Ionicons name="checkmark" size={16} color="#fff" />
+                                            <Text style={styles.approveBtnText}>Approve</Text>
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
                             </View>
                         </View>

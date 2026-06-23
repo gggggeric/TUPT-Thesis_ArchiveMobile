@@ -10,6 +10,8 @@ import {
   Platform,
   Dimensions,
   Image,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -26,6 +28,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
+const SECRET_QUESTIONS = [
+  "What was the name of your first pet?",
+  "What is your mother's maiden name?",
+  "What was the name of your elementary school?",
+  "What city were you born in?",
+  "What is your oldest sibling's middle name?",
+  "What was the make of your first car?",
+  "What is the name of the street you grew up on?"
+];
+
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -37,13 +49,16 @@ const ProfileScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [showQuestionPicker, setShowQuestionPicker] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
     birthdate: '',
     currentPassword: '',
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    secretQuestion: '',
+    secretAnswer: ''
   });
 
   // Load user data on component mount
@@ -62,7 +77,9 @@ const ProfileScreen = () => {
           birthdate: parsedUser.birthdate,
           currentPassword: '',
           newPassword: '',
-          confirmPassword: ''
+          confirmPassword: '',
+          secretQuestion: parsedUser.secretQuestion || '',
+          secretAnswer: ''
         });
       }
     } catch (error) {
@@ -140,6 +157,17 @@ const ProfileScreen = () => {
       }
     }
 
+    const hasQuestionChanged = formData.secretQuestion !== (user.secretQuestion || '');
+    if (formData.secretQuestion && hasQuestionChanged && !formData.secretAnswer.trim()) {
+      toast.show('Please provide an answer to your new security question', 'error');
+      return false;
+    }
+
+    if (!formData.secretQuestion && formData.secretAnswer.trim()) {
+      toast.show('Please select a security question for your answer', 'error');
+      return false;
+    }
+
     return true;
   };
 
@@ -162,7 +190,9 @@ const ProfileScreen = () => {
           name: formData.name.trim(),
           birthdate: formData.birthdate,
           currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword
+          newPassword: formData.newPassword,
+          secretQuestion: formData.secretQuestion || null,
+          secretAnswer: formData.secretAnswer.trim() || undefined
         }),
       });
 
@@ -177,12 +207,13 @@ const ProfileScreen = () => {
         setIsEditing(false);
         toast.show('Profile updated successfully!', 'success');
         
-        // Clear password fields
+        // Clear password and secret answer fields
         setFormData(prev => ({
           ...prev,
           currentPassword: '',
           newPassword: '',
-          confirmPassword: ''
+          confirmPassword: '',
+          secretAnswer: ''
         }));
       } else {
         toast.show(data.message || 'Failed to update profile', 'error');
@@ -203,7 +234,9 @@ const ProfileScreen = () => {
       birthdate: user.birthdate,
       currentPassword: '',
       newPassword: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      secretQuestion: user.secretQuestion || '',
+      secretAnswer: ''
     });
   };
 
@@ -415,6 +448,72 @@ const ProfileScreen = () => {
                   </View>
                 </View>
 
+                {/* Security Question (Read-only) */}
+                {!isEditing && (
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Security Question (Account Recovery)</Text>
+                    {user.secretQuestion ? (
+                      <View style={[styles.inputWrapper, styles.disabledInputWrapper]}>
+                        <Ionicons name="help-circle-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                        <Text style={styles.dateText}>
+                          {user.secretQuestion}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.notSetWrapper}>
+                        <View style={styles.notSetLeft}>
+                          <Ionicons name="warning-outline" size={20} color="#f59e0b" style={styles.inputIcon} />
+                          <Text style={styles.notSetText}>Not Set</Text>
+                        </View>
+                        <View style={styles.badgeContainer}>
+                          <Text style={styles.badgeText}>Action Required</Text>
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                )}
+
+                {/* Security Question Section (Edit Mode) */}
+                {isEditing && (
+                  <View style={styles.securitySection}>
+                    <Text style={styles.sectionTitle}>Security Question</Text>
+                    <Text style={styles.sectionSubtitle}>For account recovery without birthdate</Text>
+                    
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.label}>Choose Question</Text>
+                      <TouchableOpacity
+                        style={styles.inputWrapper}
+                        onPress={() => setShowQuestionPicker(true)}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="help-circle-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                        <Text style={formData.secretQuestion ? styles.dateText : styles.placeholderText} numberOfLines={1}>
+                          {formData.secretQuestion || 'Select a security question'}
+                        </Text>
+                        <Ionicons name="chevron-down" size={18} color="#6b7280" />
+                      </TouchableOpacity>
+                    </View>
+
+                    {formData.secretQuestion ? (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Security Answer</Text>
+                        <View style={styles.inputWrapper}>
+                          <Ionicons name="key-outline" size={20} color="#6b7280" style={styles.inputIcon} />
+                          <TextInput
+                            style={styles.input}
+                            value={formData.secretAnswer}
+                            onChangeText={(value) => handleInputChange('secretAnswer', value)}
+                            placeholder="Leave blank to keep unchanged"
+                            placeholderTextColor="#9ca3af"
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                          />
+                        </View>
+                      </View>
+                    ) : null}
+                  </View>
+                )}
+
                 {/* Password Change Section */}
                 {isEditing && (
                   <View style={styles.passwordSection}>
@@ -505,6 +604,41 @@ const ProfileScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Question Picker Modal */}
+      <Modal visible={showQuestionPicker} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowQuestionPicker(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Security Question</Text>
+            
+            {/* Clear option */}
+            <TouchableOpacity
+              style={[styles.modalItem, !formData.secretQuestion && styles.modalItemActive]}
+              onPress={() => { handleInputChange('secretQuestion', ''); setShowQuestionPicker(false); }}
+            >
+              <Text style={[styles.modalItemText, !formData.secretQuestion && styles.modalItemTextActive]}>— Clear Question —</Text>
+              {!formData.secretQuestion && <Ionicons name="checkmark" size={18} color={Colors.primary} />}
+            </TouchableOpacity>
+
+            {SECRET_QUESTIONS.map((q) => (
+              <TouchableOpacity
+                key={q}
+                style={[styles.modalItem, formData.secretQuestion === q && styles.modalItemActive]}
+                onPress={() => { handleInputChange('secretQuestion', q); setShowQuestionPicker(false); }}
+              >
+                <Text style={[styles.modalItemText, formData.secretQuestion === q && styles.modalItemTextActive]} numberOfLines={2}>
+                  {q}
+                </Text>
+                {formData.secretQuestion === q && <Ionicons name="checkmark" size={18} color={Colors.primary} />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Grid Menu */}
       {isFocused && (
@@ -759,6 +893,97 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
+  },
+  securitySection: {
+    marginTop: 24,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  notSetWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(245, 158, 11, 0.05)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+    paddingHorizontal: 14,
+    minHeight: 50,
+  },
+  notSetLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  notSetText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#f59e0b',
+  },
+  badgeContainer: {
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#f59e0b',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: Colors.card,
+    borderRadius: 32,
+    padding: 24,
+    width: '100%',
+    maxWidth: 360,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modalTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: Colors.foreground,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    marginBottom: 6,
+  },
+  modalItemActive: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  modalItemText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+    flex: 1,
+    marginRight: 10,
+  },
+  modalItemTextActive: {
+    color: Colors.primary,
+    fontWeight: '900',
   },
 });
 

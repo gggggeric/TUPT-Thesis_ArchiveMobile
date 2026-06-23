@@ -16,6 +16,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import CustomHeader from '../Navigation/CustomHeader';
 import GridMenu from '../Navigation/GridMenu';
@@ -40,6 +41,33 @@ const MyDocuments = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const user = JSON.parse(userData);
+          if (user.isProfessor) {
+            Alert.alert(
+              "Access Denied",
+              "Faculty members cannot access the Thesis Checker. You have been redirected to Faculty Approvals."
+            );
+            navigation.navigate('Approvals');
+            return;
+          } else if (user.isAdmin) {
+            Alert.alert(
+              "Access Denied",
+              "Admin administrative tools are available on the web portal. Mobile access is restricted to search, stats, and profile viewing."
+            );
+            navigation.navigate('AdminDashboard');
+            return;
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    checkUserRole();
+
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 600,

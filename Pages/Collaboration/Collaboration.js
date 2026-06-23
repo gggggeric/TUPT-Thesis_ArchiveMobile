@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    Platform, ActivityIndicator, Alert, Animated,
+    Platform, ActivityIndicator, Alert, Animated, TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +26,11 @@ const CollaborationScreen = () => {
     const [loading, setLoading] = useState(true);
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
+    // Follow-up contact info states
+    const [editingContact, setEditingContact] = useState({});
+    const [contactText, setContactText] = useState({});
+    const [savingContact, setSavingContact] = useState({});
+
     useEffect(() => {
         Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
         loadUser();
@@ -36,6 +41,24 @@ const CollaborationScreen = () => {
             const userData = await AsyncStorage.getItem('userData');
             if (userData) {
                 const user = JSON.parse(userData);
+                
+                // Guard: check if Professor or Admin
+                if (user.isProfessor) {
+                    Alert.alert(
+                        "Access Denied",
+                        "Faculty members cannot access the student Collaboration Hub. You have been redirected to Faculty Approvals."
+                    );
+                    navigation.navigate('Approvals');
+                    return;
+                } else if (user.isAdmin) {
+                    Alert.alert(
+                        "Access Denied",
+                        "Admin administrative tools are available on the web portal. Mobile access is restricted to search, stats, and profile viewing."
+                    );
+                    navigation.navigate('AdminDashboard');
+                    return;
+                }
+
                 setCurrentUser(user);
                 fetchData(user);
             }
@@ -51,19 +74,59 @@ const CollaborationScreen = () => {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             if (user.isGraduate) {
+                // Alumni: fetches incoming requests to their thesis + requests they sent
+                const [inRes, myRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/collaboration/incoming`, { headers }),
+                    fetch(`${API_BASE_URL}/collaboration/my-requests`, { headers })
+                ]);
+                const inData = await inRes.json();
+                const myData = await myRes.json();
+                if (inRes.ok) setIncomingRequests(inData.data || []);
+                if (myRes.ok) setMyRequests(myData.data || []);
+            } else {
+                // Undergrad/Student: fetches requests they sent
                 const res = await fetch(`${API_BASE_URL}/collaboration/my-requests`, { headers });
                 const data = await res.json();
-                if (res.ok) setMyRequests(data.data || []);
-            } else {
-                const res = await fetch(`${API_BASE_URL}/collaboration/incoming`, { headers });
-                const data = await res.json();
-                if (res.ok) setIncomingRequests(data.data || []);
+                if (res.ok) {
+                    setMyRequests(data.data || []);
+                    setIncomingRequests([]);
+                }
             }
         } catch (err) {
             console.error(err);
             toast.show('Failed to fetch collaboration data', 'error');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSaveContact = async (requestId) => {
+        const text = contactText[requestId]?.trim();
+        if (!text) {
+            toast.show('Please enter your contact details', 'error');
+            return;
+        }
+        setSavingContact(prev => ({ ...prev, [requestId]: true }));
+        try {
+            const token = await AsyncStorage.getItem('userToken');
+            const res = await fetch(`${API_BASE_URL}/collaboration/${requestId}/followup`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ followUpMessage: text })
+            });
+            if (res.ok) {
+                toast.show('Contact info shared successfully!', 'success');
+                setIncomingRequests(prev => prev.map(req => req._id === requestId ? { ...req, followUpMessage: text } : req));
+                setMyRequests(prev => prev.map(req => req._id === requestId ? { ...req, followUpMessage: text } : req));
+                setEditingContact(prev => ({ ...prev, [requestId]: false }));
+            } else {
+                const data = await res.json();
+                toast.show(data.message || 'Failed to share contact info', 'error');
+            }
+        } catch (err) {
+            toast.show('An error occurred', 'error');
+        } finally {
+            setSavingContact(prev => ({ ...prev, [requestId]: false }));
         }
     };
 
@@ -125,6 +188,103 @@ const CollaborationScreen = () => {
         }
     };
 
+    const renderContactSection = (req) => {
+        if (req.status !== 'accepted') return null;
+
+        const isUserAlumni = currentUser?.isGraduate;
+
+        if (isUserAlumni) {
+            const isEditing = editingContact[req._id];
+            const hasShared = !!req.followUpMessage;
+
+            if (isEditing || !hasShared) {
+                return (
+                    <View style={styles.contactContainer}>
+                        <View style={styles.contactHeaderRow}>
+                            <View style={styles.contactLabelRow}>
+                                <Ionicons name="card-outline" size={12} color={Colors.primary} />
+                                <Text style={styles.contactLabel}>SHARE YOUR CONTACT / SOCIALS</Text>
+                            </View>
+                            {isEditing && hasShared && (
+                                <TouchableOpacity 
+                                    onPress={() => setEditingContact(prev => ({ ...prev, [req._id]: false }))}
+                                    style={styles.contactEditBtn}
+                                >
+                                    <Text style={[styles.contactEditBtnText, { color: Colors.textDim }]}>Cancel</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                        <TextInput
+                            style={styles.contactInput}
+                            multiline
+                            numberOfLines={3}
+                            placeholder="e.g. FB: John Doe · Email: john@doe.com"
+                            placeholderTextColor="rgba(255,255,255,0.2)"
+                            value={contactText[req._id] !== undefined ? contactText[req._id] : (req.followUpMessage || '')}
+                            onChangeText={text => setContactText(prev => ({ ...prev, [req._id]: text }))}
+                        />
+                        <View style={styles.contactActionRow}>
+                            <TouchableOpacity
+                                style={styles.contactSaveBtn}
+                                onPress={() => handleSaveContact(req._id)}
+                                disabled={savingContact[req._id]}
+                                activeOpacity={0.8}
+                            >
+                                <Text style={styles.contactSaveBtnText}>
+                                    {savingContact[req._id] ? 'SAVING...' : 'SAVE CONTACT'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                );
+            }
+
+            return (
+                <View style={styles.contactContainer}>
+                    <View style={styles.contactHeaderRow}>
+                        <View style={styles.contactLabelRow}>
+                            <Ionicons name="checkmark-circle-outline" size={12} color={Colors.primary} />
+                            <Text style={styles.contactLabel}>CONTACT INFO SHARED</Text>
+                        </View>
+                        <TouchableOpacity 
+                            onPress={() => {
+                                setContactText(prev => ({ ...prev, [req._id]: req.followUpMessage }));
+                                setEditingContact(prev => ({ ...prev, [req._id]: true }));
+                            }}
+                            style={styles.contactEditBtn}
+                        >
+                            <Ionicons name="create-outline" size={10} color={Colors.textDim} />
+                            <Text style={styles.contactEditBtnText}>Edit</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={styles.contactText}>{req.followUpMessage}</Text>
+                </View>
+            );
+        }
+
+        // Student view: read-only
+        if (req.followUpMessage) {
+            return (
+                <View style={styles.contactContainer}>
+                    <View style={styles.contactHeaderRow}>
+                        <View style={styles.contactLabelRow}>
+                            <Ionicons name="card-outline" size={12} color={Colors.primary} />
+                            <Text style={styles.contactLabel}>ALUMNI CONTACT INFO</Text>
+                        </View>
+                    </View>
+                    <Text style={styles.contactText}>{req.followUpMessage}</Text>
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.contactWaitingContainer}>
+                <Ionicons name="time-outline" size={12} color={Colors.textDim} />
+                <Text style={styles.contactTextWaiting}>Waiting for alumni contact info…</Text>
+            </View>
+        );
+    };
+
     const renderIncomingCard = (req, index) => (
         <View key={req._id} style={styles.card}>
             {/* Alumni Info */}
@@ -134,7 +294,9 @@ const CollaborationScreen = () => {
                 </View>
                 <View style={{ flex: 1 }}>
                     <Text style={styles.cardUserName} numberOfLines={1}>{req.alumni?.name || 'Unknown'}</Text>
-                    <Text style={styles.cardUserRole}>GRADUATE STUDENT</Text>
+                    <Text style={styles.cardUserRole}>
+                        {req.alumni?.isGraduate ? 'ALUMNI' : 'STUDENT'}
+                    </Text>
                 </View>
                 <View style={[styles.statusBadge, { borderColor: `${getStatusColor(req.status)}40`, backgroundColor: `${getStatusColor(req.status)}15` }]}>
                     <Ionicons name={getStatusIcon(req.status)} size={10} color={getStatusColor(req.status)} />
@@ -160,8 +322,8 @@ const CollaborationScreen = () => {
                 <Text style={styles.messageText}>"{req.message}"</Text>
             </View>
 
-            {/* Actions */}
-            {req.status === 'pending' && (
+            {/* Actions / Contact Details */}
+            {req.status === 'pending' ? (
                 <View style={styles.actionRow}>
                     <TouchableOpacity
                         style={styles.declineBtn}
@@ -178,6 +340,8 @@ const CollaborationScreen = () => {
                         <Text style={styles.acceptBtnText}>ACCEPT</Text>
                     </TouchableOpacity>
                 </View>
+            ) : (
+                renderContactSection(req)
             )}
         </View>
     );
@@ -201,6 +365,9 @@ const CollaborationScreen = () => {
                 <View style={{ flex: 1 }}>
                     <Text style={styles.requestToLabel}>REQUEST TO</Text>
                     <Text style={styles.cardUserName} numberOfLines={1}>{req.undergrad?.name || 'Unknown'}</Text>
+                    <Text style={styles.cardUserRole}>
+                        {req.undergrad?.isGraduate ? 'ALUMNI' : 'STUDENT'}
+                    </Text>
                 </View>
             </View>
 
@@ -210,10 +377,12 @@ const CollaborationScreen = () => {
             </View>
 
             {/* Message */}
-            <View style={[styles.messageBox, { borderTopWidth: 1, borderTopColor: Colors.border, paddingTop: 16 }]}>
+            <View style={[styles.messageBox, { borderTopWidth: 1, borderTopColor: Colors.border, paddingTop: 16, marginBottom: 0 }]}>
                 <Text style={styles.thesisLabel}>SENT MESSAGE</Text>
                 <Text style={styles.messageText}>"{req.message}"</Text>
             </View>
+
+            {renderContactSection(req)}
         </View>
     );
 
@@ -247,19 +416,6 @@ const CollaborationScreen = () => {
                         </View>
                     </View>
 
-                    {/* Section Title */}
-                    <View style={styles.sectionTitleRow}>
-                        <View style={styles.titleAccent} />
-                        <Text style={styles.sectionTitle}>
-                            {currentUser?.isGraduate ? 'MY REQUESTS' : 'INCOMING REQUESTS'}
-                        </Text>
-                        <View style={styles.countBadge}>
-                            <Text style={styles.countText}>
-                                {currentUser?.isGraduate ? myRequests.length : incomingRequests.length}
-                            </Text>
-                        </View>
-                    </View>
-
                     {/* Content */}
                     {loading ? (
                         <View style={styles.emptyState}>
@@ -267,29 +423,68 @@ const CollaborationScreen = () => {
                             <Text style={styles.emptyText}>Loading requests...</Text>
                         </View>
                     ) : currentUser?.isGraduate ? (
-                        myRequests.length > 0 ? (
-                            myRequests.map((req) => renderMyRequestCard(req))
-                        ) : (
-                            <View style={styles.emptyState}>
-                                <View style={styles.emptyIconBox}>
-                                    <Ionicons name="people-outline" size={40} color={Colors.textDim} />
+                        // Alumni view: Incoming requests on their theses + their own sent requests
+                        <View style={{ gap: 24 }}>
+                            {/* Incoming Requests */}
+                            <View>
+                                <View style={styles.sectionTitleRow}>
+                                    <View style={styles.titleAccent} />
+                                    <Text style={styles.sectionTitle}>INCOMING REQUESTS</Text>
+                                    <View style={styles.countBadge}>
+                                        <Text style={styles.countText}>{incomingRequests.length}</Text>
+                                    </View>
                                 </View>
-                                <Text style={styles.emptyText}>No collaboration requests sent yet.</Text>
-                                <Text style={styles.emptySubText}>Find a thesis and send a collaboration request from its detail page.</Text>
+
+                                {incomingRequests.length > 0 ? (
+                                    incomingRequests.map((req, idx) => renderIncomingCard(req, idx))
+                                ) : (
+                                    <View style={styles.emptyState}>
+                                        <View style={styles.emptyIconBox}>
+                                            <Ionicons name="mail-outline" size={40} color={Colors.textDim} />
+                                        </View>
+                                        <Text style={styles.emptyText}>No incoming requests found.</Text>
+                                    </View>
+                                )}
                             </View>
-                        )
+
+                            {/* My Sent Requests */}
+                            {myRequests.length > 0 && (
+                                <View>
+                                    <View style={styles.sectionTitleRow}>
+                                        <View style={styles.titleAccent} />
+                                        <Text style={styles.sectionTitle}>MY SENT REQUESTS</Text>
+                                        <View style={styles.countBadge}>
+                                            <Text style={styles.countText}>{myRequests.length}</Text>
+                                        </View>
+                                    </View>
+
+                                    {myRequests.map((req) => renderMyRequestCard(req))}
+                                </View>
+                            )}
+                        </View>
                     ) : (
-                        incomingRequests.length > 0 ? (
-                            incomingRequests.map((req, idx) => renderIncomingCard(req, idx))
-                        ) : (
-                            <View style={styles.emptyState}>
-                                <View style={styles.emptyIconBox}>
-                                    <Ionicons name="mail-outline" size={40} color={Colors.textDim} />
+                        // Undergrad view: Requests they sent
+                        <View>
+                            <View style={styles.sectionTitleRow}>
+                                <View style={styles.titleAccent} />
+                                <Text style={styles.sectionTitle}>MY REQUESTS</Text>
+                                <View style={styles.countBadge}>
+                                    <Text style={styles.countText}>{myRequests.length}</Text>
                                 </View>
-                                <Text style={styles.emptyText}>No incoming requests found.</Text>
-                                <Text style={styles.emptySubText}>When a graduate student requests to collaborate on your thesis, it will appear here.</Text>
                             </View>
-                        )
+
+                            {myRequests.length > 0 ? (
+                                myRequests.map((req) => renderMyRequestCard(req))
+                            ) : (
+                                <View style={styles.emptyState}>
+                                    <View style={styles.emptyIconBox}>
+                                        <Ionicons name="people-outline" size={40} color={Colors.textDim} />
+                                    </View>
+                                    <Text style={styles.emptyText}>No collaboration requests sent yet.</Text>
+                                    <Text style={styles.emptySubText}>Your requests for collaboration will show here.</Text>
+                                </View>
+                            )}
+                        </View>
                     )}
                 </Animated.View>
             </ScrollView>
@@ -548,6 +743,112 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 18,
         paddingHorizontal: 20,
+    },
+
+    contactContainer: {
+        marginTop: 14,
+        padding: 14,
+        backgroundColor: 'rgba(45, 212, 191, 0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(45, 212, 191, 0.2)',
+        borderRadius: 16,
+    },
+    contactHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    contactLabelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    contactLabel: {
+        fontSize: 9,
+        fontWeight: '900',
+        color: Colors.primary,
+        letterSpacing: 1.5,
+        textTransform: 'uppercase',
+    },
+    contactEditBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    contactEditBtnText: {
+        fontSize: 9,
+        fontWeight: '900',
+        color: Colors.textDim,
+        textTransform: 'uppercase',
+    },
+    contactText: {
+        fontSize: 11,
+        color: Colors.foreground,
+        lineHeight: 16,
+        fontWeight: '500',
+    },
+    contactTextWaiting: {
+        fontSize: 10,
+        color: Colors.textDim,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    contactInput: {
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 12,
+        padding: 10,
+        color: Colors.foreground,
+        fontSize: 11,
+        minHeight: 60,
+        textAlignVertical: 'top',
+        marginBottom: 10,
+    },
+    contactActionRow: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    contactCancelBtn: {
+        flex: 1,
+        paddingVertical: 8,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    contactCancelBtnText: {
+        fontSize: 9,
+        fontWeight: '900',
+        color: Colors.textSecondary,
+    },
+    contactSaveBtn: {
+        flex: 1,
+        paddingVertical: 8,
+        borderRadius: 10,
+        backgroundColor: Colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    contactSaveBtnText: {
+        fontSize: 9,
+        fontWeight: '900',
+        color: Colors.background,
+    },
+    contactWaitingContainer: {
+        marginTop: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        backgroundColor: 'rgba(255,255,255,0.02)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
+        borderRadius: 12,
     },
 });
 

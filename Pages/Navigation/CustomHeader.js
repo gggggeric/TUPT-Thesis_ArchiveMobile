@@ -21,7 +21,7 @@ import Colors from '../../utils/Colors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const CustomHeader = ({ onMenuPress, onSearch, searchQuery, onSearchChange }) => {
+const CustomHeader = ({ onMenuPress, onSearch, searchQuery, onSearchChange, showSearch = true }) => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const searchInputRef = React.useRef(null);
@@ -92,73 +92,76 @@ const CustomHeader = ({ onMenuPress, onSearch, searchQuery, onSearchChange }) =>
     <View style={[styles.header, { paddingTop: insets.top > 0 ? insets.top + 8 : 16 }]}>
       <StatusBar backgroundColor="transparent" translucent={true} barStyle="light-content" />
       
+      {showSearch ? (
+        <>
+          {/* Static Search Bar */}
+          <View style={styles.searchWrapper}>
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={18} color="rgba(255, 255, 255, 0.7)" style={styles.searchIcon} />
+              
+              <TextInput
+                ref={searchInputRef}
+                style={styles.searchInput}
+                placeholder="Search research papers..."
+                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                value={searchQuery}
+                onChangeText={onSearchChange}
+                onFocus={() => {
+                    setIsSearchFocused(true);
+                    loadSearchHistory();
+                }}
+                onBlur={() => {
+                    // Delay hiding to allow taps on history
+                    setTimeout(() => setIsSearchFocused(false), 200);
+                }}
+                onSubmitEditing={handleSearchSubmit}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="search"
+              />
 
-      {/* Static Search Bar */}
-      <View style={styles.searchWrapper}>
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={18} color="rgba(255, 255, 255, 0.7)" style={styles.searchIcon} />
-          
-          <TextInput
-            ref={searchInputRef}
-            style={styles.searchInput}
-            placeholder="Search research papers..."
-            placeholderTextColor="rgba(255, 255, 255, 0.7)"
-            value={searchQuery}
-            onChangeText={onSearchChange}
-            onFocus={() => {
-                setIsSearchFocused(true);
-                loadSearchHistory();
-            }}
-            onBlur={() => {
-                // Delay hiding to allow taps on history
-                setTimeout(() => setIsSearchFocused(false), 200);
-            }}
-            onSubmitEditing={handleSearchSubmit}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-          />
-
-          {searchQuery ? (
-            <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
-              <Ionicons name="close" size={18} color="white" />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-
-        {/* Search History Dropdown */}
-        {isSearchFocused && history.length > 0 && (
-            <View style={styles.historyDropdown}>
-                {history.map((item, index) => (
-                    <TouchableOpacity 
-                        key={index} 
-                        style={styles.historyItem}
-                        onPress={() => handleHistoryTap(item)}
-                    >
-                        <Ionicons name="time-outline" size={16} color="#9ca3af" style={{ marginRight: 10 }} />
-                        <Text style={styles.historyText} numberOfLines={1}>{item}</Text>
-                        <Ionicons name="arrow-back" size={14} color="#d1d5db" style={{ transform: [{ rotate: '135deg' }] }} />
-                    </TouchableOpacity>
-                ))}
+              {searchQuery ? (
+                <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
+                  <Ionicons name="close" size={18} color="white" />
+                </TouchableOpacity>
+              ) : null}
             </View>
-        )}
-      </View>
 
-      {/* Action Buttons */}
-      <View style={styles.searchActions}>
-        <TouchableOpacity 
-          onPress={handleSearchSubmit} 
-          style={styles.actionIcon}
-        >
-          <Ionicons name="search" size={24} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={handleQuickSearch} 
-          style={styles.actionIcon}
-        >
-          <Ionicons name="options" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+            {/* Search History Dropdown */}
+            {isSearchFocused && history.length > 0 && (
+                <View style={styles.historyDropdown}>
+                    {history.map((item, index) => (
+                        <TouchableOpacity 
+                            key={index} 
+                            style={styles.historyItem}
+                            onPress={() => handleHistoryTap(item)}
+                        >
+                            <Ionicons name="time-outline" size={16} color="#9ca3af" style={{ marginRight: 10 }} />
+                            <Text style={styles.historyText} numberOfLines={1}>{item}</Text>
+                            <Ionicons name="arrow-back" size={14} color="#d1d5db" style={{ transform: [{ rotate: '135deg' }] }} />
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.searchActions}>
+            <TouchableOpacity 
+              onPress={handleSearchSubmit} 
+              style={styles.actionIcon}
+            >
+              <Ionicons name="search" size={24} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={handleQuickSearch} 
+              style={styles.actionIcon}
+            >
+              <Ionicons name="options" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        </>
+      ) : null}
     </View>
   );
 };

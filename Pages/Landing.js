@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
-  ImageBackground,
   Platform,
   SafeAreaView,
   Image,
@@ -101,597 +100,685 @@ const LandingScreen = () => {
 
   const translateY = (anim) => anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [20, 0],
+    outputRange: [25, 0],
   });
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-      bounces={false}
-    >
-      {/* ════ HERO SECTION ════ */}
-      <View style={styles.heroSection}>
-          <LinearGradient
-            colors={['#0a0a0f', '#1e1e2e', '#0a0a0f']}
-            style={styles.heroGradient}
-          >
-            <View style={[styles.heroSafeArea, { paddingTop: insets.top }]}>
-              {/* Header Nav */}
-              <Animated.View style={[styles.headerNav, { 
-                top: insets.top, 
-                opacity: secondaryActionsAnim, 
-                transform: [{ translateY: translateY(secondaryActionsAnim) }] 
-              }]}>
-                <View style={styles.headerLogoContainer}>
-                  <View style={styles.headerLogoCircle}>
-                    <Image source={require('../assets/tup-logo.png')} style={styles.headerLogo} resizeMode="contain" />
-                  </View>
-                  <View>
-                    <Text style={styles.headerBrand}>TUPT LIBRARY</Text>
-                    <Text style={styles.headerBrandSub}>ACTIVE SYSTEM</Text>
-                  </View>
-                </View>
+    <View style={styles.outerContainer}>
+      {/* ════ Sleek Glowing Backgrounds ════ */}
+      <LinearGradient
+        colors={[`${Colors.primary}12`, 'transparent']}
+        style={styles.glowOrb1}
+      />
+      <LinearGradient
+        colors={[`${Colors.purple}08`, 'transparent']}
+        style={styles.glowOrb2}
+      />
 
-                <View style={styles.headerAuthContainer}>
-                  <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.headerSignInBtn}>
-                    <Text style={styles.headerSignInText}>SIGN IN</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.headerRegisterBtn}>
-                    <Text style={styles.headerRegisterText}>REGISTER</Text>
-                  </TouchableOpacity>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        contentContainerStyle={{ paddingBottom: 60 }}
+      >
+        {/* ════ HERO SECTION ════ */}
+        <View style={styles.heroSection}>
+          <View style={[styles.heroSafeArea, { paddingTop: insets.top + 16 }]}>
+            
+            {/* Floating Glassmorphic Header Nav */}
+            <Animated.View style={[styles.headerNav, { 
+              opacity: secondaryActionsAnim, 
+              transform: [{ translateY: translateY(secondaryActionsAnim) }] 
+            }]}>
+              <View style={styles.headerLogoContainer}>
+                <View style={styles.headerLogoCircle}>
+                  <Image source={require('../assets/tup-logo.png')} style={styles.headerLogo} resizeMode="contain" />
                 </View>
+                <View>
+                  <Text style={styles.headerBrand}>TUPT-THESIS</Text>
+                  <Text style={styles.headerBrandSub}>ARCHIVE</Text>
+                </View>
+              </View>
+
+              <View style={styles.headerAuthContainer}>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.headerSignInBtn} activeOpacity={0.7}>
+                  <Text style={styles.headerSignInText}>SIGN IN</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.headerRegisterBtn} activeOpacity={0.85}>
+                  <Text style={styles.headerRegisterText}>REGISTER</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+
+            {/* Hero Content */}
+            <View style={styles.heroContent}>
+              {/* Premium Sparkles Tag */}
+              <Animated.View style={[
+                styles.tagBadge,
+                { opacity: subtitleAnim, transform: [{ translateY: translateY(subtitleAnim) }] }
+              ]}>
+                <Ionicons name="sparkles-sharp" size={10} color={Colors.primary} />
+                <Text style={styles.tagBadgeText}>TUP DIGITAL SYSTEM</Text>
               </Animated.View>
 
-              {/* Hero Content - Adjusted for iPhone */}
-              <View style={[styles.heroContent, { paddingTop: 80 }]}>
-                <View style={styles.heroTextContainer}>
-                  <Animated.Text style={[
-                    styles.heroTitle,
-                    { opacity: titleAnim, transform: [{ translateY: translateY(titleAnim) }] }
-                  ]}>
-                    TUP DIGITAL RESEARCH LIBRARY
-                  </Animated.Text>
+              <Animated.Text style={[
+                styles.heroTitle,
+                { opacity: titleAnim, transform: [{ translateY: translateY(titleAnim) }] }
+              ]}>
+                TUPT-Thesis{'\n'}
+                <Text style={{ color: Colors.primary }}>Archive</Text>
+              </Animated.Text>
 
-                  <Animated.Text style={[
-                    styles.heroSubtitle,
-                    { opacity: subtitleAnim, transform: [{ translateY: translateY(subtitleAnim) }] }
-                  ]}>
-                    A central library for TUP students. Store, search, and check your research with university standards.
-                  </Animated.Text>
+              <Animated.Text style={[
+                styles.heroSubtitle,
+                { opacity: subtitleAnim, transform: [{ translateY: translateY(subtitleAnim) }] }
+              ]}>
+                A central library for TUP students. Store, search, and check your research with university standards.
+              </Animated.Text>
 
-                  <Animated.View style={{ 
-                    opacity: primaryBtnAnim, 
-                    transform: [{ translateY: translateY(primaryBtnAnim) }],
-                    width: '100%',
-                    alignItems: 'center',
-                    marginTop: 10
-                  }}>
-                    <TouchableOpacity
-                      style={styles.btnHeroPrimary}
-                      onPress={() => navigation.navigate('Register')}
-                      activeOpacity={0.9}
-                    >
-                      <Text style={styles.btnHeroPrimaryText}>GET STARTED</Text>
-                      <Ionicons name="arrow-forward" size={16} color={Colors.background} />
-                    </TouchableOpacity>
-                  </Animated.View>
-                </View>
-              </View>
-
-              {/* Lottie Animation - More compact for iPhone */}
-              <View style={styles.lottieContainer}>
-                <LottieView
-                  source={require('../assets/animations/Man and robot with computers sitting together in workplace.json')}
-                  autoPlay
-                  loop
-                  style={[styles.lottieBackground, { height: width * 0.7 }]}
-                />
-              </View>
-            </View>
-          </LinearGradient>
-      </View>
-
-      {/* ════ FEATURE SECTIONS ════ */}
-      <View style={styles.featuresContainer}>
-        {features.map((feat) => (
-          <View key={feat.number} style={styles.featureBlock}>
-            <View style={styles.featureHeader}>
-              <Text style={[styles.featureNumberLabel, { color: feat.color }]}>FEATURE {feat.number}</Text>
-              <Text style={styles.featureMainTitle}>{feat.title}</Text>
-              <View style={[styles.featureTitleUnderline, { backgroundColor: feat.color }]} />
+              {/* Main Get Started Button */}
+              <Animated.View style={{ 
+                opacity: primaryBtnAnim, 
+                transform: [{ translateY: translateY(primaryBtnAnim) }],
+                width: '100%',
+                alignItems: 'center',
+                marginTop: 8
+              }}>
+                <TouchableOpacity
+                  style={styles.btnHeroPrimary}
+                  onPress={() => navigation.navigate('Register')}
+                  activeOpacity={0.9}
+                >
+                  <Text style={styles.btnHeroPrimaryText}>GET STARTED</Text>
+                  <Ionicons name="arrow-forward" size={16} color={Colors.background} />
+                </TouchableOpacity>
+              </Animated.View>
             </View>
 
-            <View style={styles.featureCard}>
-              <View style={[styles.featureIconBox, { backgroundColor: `${feat.color}18`, borderColor: `${feat.color}30` }]}>
-                <Ionicons name={feat.icon} size={30} color={feat.color} />
-              </View>
-
-              <View style={[styles.featureBadge, { borderColor: `${feat.color}40` }]}>
-                <Text style={[styles.featureBadgeText, { color: feat.color }]}>{feat.badge}</Text>
-              </View>
-
-              <Text style={styles.featureDesc}>{feat.desc}</Text>
-            </View>
+            {/* Lottie Animation Illustration */}
+            <Animated.View style={[styles.lottieContainer, { opacity: subtitleAnim }]}>
+              <LottieView
+                source={require('../assets/animations/Man and robot with computers sitting together in workplace.json')}
+                autoPlay
+                loop
+                style={styles.lottieBackground}
+              />
+            </Animated.View>
           </View>
-        ))}
-      </View>
-
-      {/* ════ WHY CHOOSE SECTION ════ */}
-      <View style={styles.whyChooseSection}>
-        <Text style={styles.sectionSubtitle}>INNOVATION FIRST</Text>
-        <Text style={styles.sectionTitle}>Library of{'\n'}<Text style={styles.sectionTitleAccent}>Knowledge</Text></Text>
-        <Text style={styles.sectionDesc}>
-          We've built more than just a storage system. A high-performance environment designed to protect student research while making it accessible for the next generation.
-        </Text>
-
-        <View style={styles.benefitsGrid}>
-          {[
-            { title: 'Trusted Source', desc: 'Secure library endorsed by TUP-Taguig leadership.', icon: 'shield-checkmark' },
-            { title: 'Modern Tools', desc: 'Next-gen search and analysis interface.', icon: 'rocket' },
-            { title: 'Simple Design', desc: 'A simple, clean student experience.', icon: 'bulb' },
-            { title: 'Verified Quality', desc: 'AI checking for academic standards.', icon: 'checkmark-circle' },
-          ].map((item, i) => (
-            <View key={i} style={styles.benefitCard}>
-              <Ionicons name={item.icon} size={28} color={Colors.primary} style={styles.benefitIcon} />
-              <Text style={styles.benefitTitle}>{item.title}</Text>
-              <Text style={styles.benefitDesc}>{item.desc}</Text>
-            </View>
-          ))}
         </View>
-      </View>
 
-      {/* ════ CORE FUNCTIONS SECTION ════ */}
-      <LinearGradient
-        colors={[Colors.card, Colors.background]}
-        style={styles.coreFunctionsSection}
-      >
-        <Text style={styles.sectionSubtitleSecondary}>WHAT THE APP DOES</Text>
-        <Text style={styles.sectionTitleWhite}>WHAT DOES IT DO?</Text>
+        {/* ════ FEATURE SECTIONS ════ */}
+        <View style={styles.featuresContainer}>
+          <View style={styles.sectionHeaderCentered}>
+            <Text style={styles.sectionSubtitle}>CORE ABILITIES</Text>
+            <Text style={styles.sectionTitleCentered}>System Features</Text>
+            <View style={styles.centeredAccentLine} />
+          </View>
 
-        <View style={styles.coreFunctionsList}>
-          {[
-            { icon: 'search', title: 'QUICK SEARCH', desc: 'Search thousands of student papers in milliseconds with our advanced search system.' },
-            { icon: 'checkmark-circle', title: 'AI HELP', desc: 'Ensure your research title meets quality standards before submitting.' },
-            { icon: 'document-text', title: 'RESEARCH COLLECTION', desc: 'Digitally store your approved thesis with details to inspire future students.' },
-          ].map((item, i) => (
-            <View key={i} style={styles.coreFuncItem}>
-              <View style={styles.coreFuncIconBox}>
-                <Ionicons name={item.icon} size={36} color={Colors.secondary} />
+          {features.map((feat) => (
+            <View key={feat.number} style={styles.featureBlock}>
+              <View style={styles.featureHeader}>
+                <Text style={[styles.featureNumberLabel, { color: feat.color }]}>FEATURE {feat.number}</Text>
+                <Text style={styles.featureMainTitle}>{feat.title}</Text>
+                <View style={[styles.featureTitleUnderline, { backgroundColor: feat.color }]} />
               </View>
-              <Text style={styles.coreFuncTitle}>{item.title}</Text>
-              <Text style={styles.coreFuncDesc}>{item.desc}</Text>
-            </View>
-          ))}
-        </View>
-      </LinearGradient>
 
-      {/* ════ HOW IT WORKS SECTION ════ */}
-      <View style={styles.howItWorksSection}>
-        <Text style={styles.sectionSubtitle}>HOW IT WORKS</Text>
-        <Text style={[styles.sectionTitle, { color: Colors.foreground }]}>HOW DOES IT WORK?</Text>
+              <View style={styles.featureCard}>
+                <View style={[styles.featureIconBox, { backgroundColor: `${feat.color}12`, borderColor: `${feat.color}25` }]}>
+                  <Ionicons name={feat.icon} size={28} color={feat.color} />
+                </View>
 
-        <View style={styles.workflowGrid}>
-          {[
-            { step: '01', title: 'REGISTER', desc: 'Securely create your student account using your TUP ID.' },
-            { step: '02', title: 'EXPLORE', desc: 'Search previous research to find inspiration for your project.' },
-            { step: '03', title: 'CHECK', desc: 'Upload your title and summary to get feedback.' },
-            { step: '04', title: 'SAVE', desc: 'Save your research in the official TUP digital library.' },
-          ].map((item, i) => (
-            <View key={i} style={styles.workflowCard}>
-              <Text style={styles.workflowStepNum}>{item.step}</Text>
-              <Text style={styles.workflowTitle}>{item.title}</Text>
-              <Text style={styles.workflowDesc}>{item.desc}</Text>
+                <View style={[styles.featureBadge, { borderColor: `${feat.color}25`, backgroundColor: `${feat.color}08` }]}>
+                  <Text style={[styles.featureBadgeText, { color: feat.color }]}>{feat.badge}</Text>
+                </View>
+
+                <Text style={styles.featureDesc}>{feat.desc}</Text>
+              </View>
             </View>
           ))}
         </View>
 
-        <TouchableOpacity
-          style={styles.btnFooterPrimary}
-          onPress={() => navigation.navigate('Register')}
-          activeOpacity={0.9}
-        >
-          <Text style={styles.btnFooterPrimaryText}>GET STARTED NOW</Text>
-        </TouchableOpacity>
-      </View>
+        {/* ════ WHY CHOOSE SECTION ════ */}
+        <View style={styles.whyChooseSection}>
+          <Text style={styles.sectionSubtitle}>INNOVATION FIRST</Text>
+          <Text style={styles.sectionTitle}>Library of{'\n'}<Text style={styles.sectionTitleAccent}>Knowledge</Text></Text>
+          <Text style={styles.sectionDesc}>
+            We've built more than just a storage system. A high-performance environment designed to protect student research while making it accessible for the next generation.
+          </Text>
 
-    </ScrollView>
+          <View style={styles.benefitsGrid}>
+            {[
+              { title: 'Trusted Source', desc: 'Secure library endorsed by TUP-Taguig leadership.', icon: 'shield-checkmark-outline' },
+              { title: 'Modern Tools', desc: 'Next-gen search and analysis interface.', icon: 'rocket-outline' },
+              { title: 'Simple Design', desc: 'A simple, clean student experience.', icon: 'bulb-outline' },
+              { title: 'Verified Quality', desc: 'AI checking for academic standards.', icon: 'checkmark-circle-outline' },
+            ].map((item, i) => (
+              <View key={i} style={styles.benefitCard}>
+                <View style={styles.benefitIconCircle}>
+                  <Ionicons name={item.icon} size={24} color={Colors.primary} />
+                </View>
+                <Text style={styles.benefitTitle}>{item.title}</Text>
+                <Text style={styles.benefitDesc}>{item.desc}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* ════ CORE FUNCTIONS SECTION ════ */}
+        <View style={styles.coreFunctionsSection}>
+          <Text style={styles.sectionSubtitleSecondary}>WHAT THE APP DOES</Text>
+          <Text style={styles.sectionTitleWhite}>Core Functions</Text>
+          <View style={[styles.centeredAccentLine, { backgroundColor: Colors.secondary }]} />
+
+          <View style={styles.coreFunctionsList}>
+            {[
+              { icon: 'search', title: 'QUICK SEARCH', desc: 'Search thousands of student papers in milliseconds with our advanced search system.' },
+              { icon: 'checkmark-circle', title: 'AI HELP', desc: 'Ensure your research title meets quality standards before submitting.' },
+              { icon: 'document-text', title: 'RESEARCH COLLECTION', desc: 'Digitally store your approved thesis with details to inspire future students.' },
+            ].map((item, i) => (
+              <View key={i} style={styles.coreFuncItem}>
+                <View style={styles.coreFuncIconBox}>
+                  <Ionicons name={item.icon} size={30} color={Colors.secondary} />
+                </View>
+                <Text style={styles.coreFuncTitle}>{item.title}</Text>
+                <Text style={styles.coreFuncDesc}>{item.desc}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* ════ HOW IT WORKS SECTION ════ */}
+        <View style={styles.howItWorksSection}>
+          <Text style={styles.sectionSubtitle}>HOW IT WORKS</Text>
+          <Text style={[styles.sectionTitle, { color: Colors.foreground }]}>Simple Workflow</Text>
+
+          <View style={styles.workflowGrid}>
+            {[
+              { step: '01', title: 'REGISTER', desc: 'Securely create your student account using your TUP ID.' },
+              { step: '02', title: 'EXPLORE', desc: 'Search previous research to find inspiration for your project.' },
+              { step: '03', title: 'CHECK', desc: 'Upload your title and summary to get feedback.' },
+              { step: '04', title: 'SAVE', desc: 'Save your research in the official TUP digital library.' },
+            ].map((item, i) => (
+              <View key={i} style={styles.workflowCard}>
+                <View style={styles.workflowHeader}>
+                  <Text style={styles.workflowStepNum}>{item.step}</Text>
+                  <Text style={styles.workflowTitle}>{item.title}</Text>
+                </View>
+                <Text style={styles.workflowDesc}>{item.desc}</Text>
+              </View>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={styles.btnFooterPrimary}
+            onPress={() => navigation.navigate('Register')}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.btnFooterPrimaryText}>GET STARTED NOW</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    backgroundColor: '#0C0C14', // Deep premium dark background
+  },
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
 
-  // -- Hero --
+  // Glowing Orbs
+  glowOrb1: {
+    position: 'absolute',
+    top: height * 0.15,
+    right: -width * 0.3,
+    width: width * 0.9,
+    height: width * 0.9,
+    borderRadius: (width * 0.9) / 2,
+    zIndex: 0,
+  },
+  glowOrb2: {
+    position: 'absolute',
+    bottom: height * 0.1,
+    left: -width * 0.3,
+    width: width * 0.9,
+    height: width * 0.9,
+    borderRadius: (width * 0.9) / 2,
+    zIndex: 0,
+  },
+
+  // Hero Section
   heroSection: {
-    height: height,
+    minHeight: height * 0.95,
     width: '100%',
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  heroGradient: {
-    flex: 1,
   },
   heroSafeArea: {
     flex: 1,
-  },
-  lottieContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  lottieBackground: {
-    width: width,
-    height: width * 0.8, // Adjust aspect ratio to fit below text
+    justifyContent: 'space-between',
   },
   headerNav: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 0,
-    paddingBottom: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(38, 38, 55, 0.45)', // Translucent glass header
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
     zIndex: 100,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8 },
+      android: { elevation: 4 }
+    }),
   },
   headerLogoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   headerLogoCircle: {
-    width: 36,
-    height: 36,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 4,
+    width: 32,
+    height: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerLogo: {
-    width: 24,
-    height: 24,
+    width: 22,
+    height: 22,
   },
   headerBrand: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '900',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   headerBrandSub: {
     color: Colors.primary,
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '900',
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
   headerAuthContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 6,
   },
   headerSignInBtn: {
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
   headerSignInText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 11,
-    fontWeight: 'bold',
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 10,
+    fontWeight: '800',
     letterSpacing: 1,
   },
   headerRegisterBtn: {
     backgroundColor: Colors.primary,
-    paddingVertical: 9,
-    paddingHorizontal: 16,
-    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 12,
   },
   headerRegisterText: {
     color: Colors.background,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
+
   heroContent: {
-    paddingTop: 100, // Make room for absolute header
+    paddingTop: 48,
     paddingHorizontal: 24,
     alignItems: 'center',
   },
-  heroTextContainer: {
+  tagBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(45, 212, 191, 0.06)',
+    borderColor: 'rgba(45, 212, 191, 0.18)',
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  tagBadgeText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.primary,
+    letterSpacing: 1.5,
   },
   heroTitle: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '900',
     color: '#fff',
     textAlign: 'center',
-    lineHeight: 40,
-    marginBottom: 20,
+    lineHeight: 38,
+    marginBottom: 16,
     letterSpacing: -0.5,
+    textTransform: 'uppercase',
   },
   heroSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.65)',
+    fontSize: 14,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 22,
     marginBottom: 24,
     fontWeight: '500',
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
   },
   btnHeroPrimary: {
     backgroundColor: Colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 32,
-    borderRadius: 4,
+    paddingVertical: 15,
+    paddingHorizontal: 26,
+    borderRadius: 16,
     width: '100%',
-    maxWidth: 320,
-    gap: 12,
-    ...Platform.select({
-      ios: { shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
-      android: { elevation: 6 }
-    }),
+    maxWidth: 260,
+    gap: 8,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   btnHeroPrimaryText: {
     color: Colors.background,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '900',
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
 
-  // -- Features --
-  featuresContainer: {
-    backgroundColor: Colors.background,
-    paddingVertical: 20,
+  lottieContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    paddingBottom: 20,
   },
-  featureBlock: {
+  lottieBackground: {
+    width: width * 0.9,
+    height: width * 0.65,
+  },
+
+  // Centered Section Header
+  sectionHeaderCentered: {
+    alignItems: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 32,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    marginBottom: 24,
   },
-  featureHeader: {
-    marginBottom: 20,
-  },
-  featureNumberLabel: {
-    fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 3,
-    marginBottom: 10,
-  },
-  featureMainTitle: {
-    fontSize: 28,
+  sectionTitleCentered: {
+    fontSize: 26,
     fontWeight: '900',
     color: Colors.foreground,
     textTransform: 'uppercase',
-    lineHeight: 31,
     letterSpacing: -0.5,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  centeredAccentLine: {
+    width: 48,
+    height: 3,
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
+  },
+
+  // Features Container
+  featuresContainer: {
+    paddingVertical: 48,
+    borderTopWidth: 1,
+    borderColor: Colors.border,
+  },
+  featureBlock: {
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+  },
+  featureHeader: {
     marginBottom: 14,
   },
+  featureNumberLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  featureMainTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: Colors.foreground,
+    textTransform: 'uppercase',
+    lineHeight: 24,
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
   featureTitleUnderline: {
-    height: 3,
-    width: 50,
+    height: 2,
+    width: 32,
     borderRadius: 1,
   },
   featureCard: {
-    borderRadius: 4,
+    borderRadius: 24,
     padding: 20,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(38, 38, 55, 0.25)', // Elegant transparent cards
   },
   featureIconBox: {
-    width: 56,
-    height: 56,
-    borderRadius: 4,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   featureBadge: {
     alignSelf: 'flex-start',
     borderWidth: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
-    marginBottom: 12,
+    borderRadius: 8,
+    marginBottom: 10,
   },
   featureBadgeText: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '900',
-    letterSpacing: 1.5,
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
   featureDesc: {
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 13,
+    lineHeight: 20,
     color: Colors.textSecondary,
     fontWeight: '500',
   },
 
-  // -- Why Choose --
+  // Why Choose
   whyChooseSection: {
-    backgroundColor: Colors.surface,
-    paddingTop: 60,
-    paddingBottom: 60,
+    paddingVertical: 48,
     paddingHorizontal: 24,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  sectionSubtitle: {
-    color: Colors.primary,
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 3,
-    marginBottom: 12,
-  },
-  sectionSubtitleSecondary: {
-    color: Colors.secondary,
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 3,
-    marginBottom: 12,
-    textAlign: 'center',
+    borderColor: Colors.border,
   },
   sectionTitle: {
-    fontSize: 36,
+    fontSize: 30,
     fontWeight: '900',
     color: Colors.foreground,
     textTransform: 'uppercase',
-    lineHeight: 38,
-    letterSpacing: -1,
-    marginBottom: 20,
+    lineHeight: 34,
+    letterSpacing: -0.5,
+    marginBottom: 16,
   },
   sectionTitleAccent: {
     color: Colors.primary,
   },
   sectionDesc: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 14,
+    lineHeight: 22,
     color: Colors.textSecondary,
     fontWeight: '500',
-    marginBottom: 36,
+    marginBottom: 28,
   },
   benefitsGrid: {
-    gap: 14,
+    gap: 12,
   },
   benefitCard: {
-    backgroundColor: Colors.card,
+    backgroundColor: 'rgba(38, 38, 55, 0.2)',
     padding: 20,
-    borderRadius: 4,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
   },
-  benefitIcon: {
+  benefitIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(45, 212, 191, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(45, 212, 191, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 12,
   },
   benefitTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '900',
     color: Colors.foreground,
     textTransform: 'uppercase',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   benefitDesc: {
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.textSecondary,
     fontWeight: '500',
     lineHeight: 18,
   },
 
-  // -- Core Functions --
+  // Core Functions
   coreFunctionsSection: {
-    paddingVertical: 60,
+    paddingVertical: 48,
     paddingHorizontal: 24,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderColor: Colors.border,
   },
   sectionTitleWhite: {
-    fontSize: 34,
+    fontSize: 26,
     fontWeight: '900',
     color: Colors.foreground,
     textTransform: 'uppercase',
-    lineHeight: 36,
-    letterSpacing: -1,
-    marginBottom: 40,
+    letterSpacing: -0.5,
+    marginTop: 4,
+    marginBottom: 12,
     textAlign: 'center',
   },
   coreFunctionsList: {
-    gap: 40,
+    gap: 28,
+    marginTop: 32,
   },
   coreFuncItem: {
     alignItems: 'center',
+    backgroundColor: 'rgba(38, 38, 55, 0.15)',
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.03)',
   },
   coreFuncIconBox: {
-    width: 80,
-    height: 80,
-    borderRadius: 6,
-    backgroundColor: 'rgba(103,232,249,0.08)',
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: 'rgba(103,232,249,0.05)',
     borderWidth: 1,
     borderColor: 'rgba(103,232,249,0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   coreFuncTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '900',
     color: Colors.foreground,
     textTransform: 'uppercase',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   coreFuncDesc: {
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.textSecondary,
     fontWeight: '500',
-    lineHeight: 20,
+    lineHeight: 18,
     textAlign: 'center',
   },
 
-  // -- How It Works --
+  // How It Works
   howItWorksSection: {
-    backgroundColor: Colors.background,
-    paddingVertical: 60,
+    paddingVertical: 48,
     paddingHorizontal: 24,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  workflowGrid: {
-    gap: 14,
-    marginBottom: 40,
-  },
-  workflowCard: {
-    backgroundColor: Colors.card,
-    padding: 20,
-    borderRadius: 4,
-    borderWidth: 1,
     borderColor: Colors.border,
   },
+  workflowGrid: {
+    gap: 12,
+    marginBottom: 28,
+  },
+  workflowCard: {
+    backgroundColor: 'rgba(38, 38, 55, 0.2)',
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
+  },
+  workflowHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
   workflowStepNum: {
-    fontSize: 44,
+    fontSize: 20,
     fontWeight: '900',
-    color: 'rgba(255,255,255,0.06)',
-    marginBottom: 12,
-    letterSpacing: -2,
+    color: Colors.primary,
+    opacity: 0.8,
   },
   workflowTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '900',
     color: Colors.foreground,
     textTransform: 'uppercase',
-    marginBottom: 6,
   },
   workflowDesc: {
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.textSecondary,
     fontWeight: '500',
     lineHeight: 18,
   },
   btnFooterPrimary: {
     backgroundColor: Colors.primary,
-    paddingVertical: 18,
-    borderRadius: 4,
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: 'center',
-    ...Platform.select({
-      ios: { shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
-      android: { elevation: 6 }
-    }),
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   btnFooterPrimaryText: {
     color: Colors.background,
     fontSize: 13,
     fontWeight: '900',
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
 });
 
